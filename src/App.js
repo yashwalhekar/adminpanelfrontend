@@ -1,0 +1,67 @@
+// src/App.js
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Box } from "@mui/material";
+import Navbar from "./components/Navbar";
+import Dashboard from "./pages/Dashboard";
+import AddAds from "./pages/AddAds";
+import AdList from "./pages/AdList";
+import Login from "./pages/Login";
+import Tagline from "./pages/Tagline";
+
+// ✅ ProtectedRoute component
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" />;
+};
+
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        {/* ✅ Public Route */}
+        <Route path="/login" element={<Login />} />
+
+        {/* ✅ Protected Routes */}
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
+              <Box sx={{ display: "flex" }}>
+                {/* ✅ Sidebar/Navbar */}
+                <Navbar />
+
+                {/* ✅ Main Content Area */}
+                <Box
+                  component="main"
+                  sx={{
+                    flexGrow: 1,
+                    p: 3,
+                    mt: "64px",
+                    ml: { md: "3px" },
+                    minHeight: "100vh",
+                  }}
+                >
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/dashboard" />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/add-ads" element={<AddAds />} />
+                    <Route path="/allads" element={<AdList />} />
+                    <Route path="/add-tagline" element={<Tagline />}></Route>
+                  </Routes>
+                </Box>
+              </Box>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
