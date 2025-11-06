@@ -61,12 +61,9 @@ const AddAds = () => {
       formData.append("image", image);
       formData.append("startDate", startDate);
       formData.append("endDate", endDate);
-      const res = await API.post("/ads", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
+      console.log(formData);
+      const res = await API.post("/ads", formData);
+      console.log(formData);
       setSnackbar({
         open: true,
         message: res.data.message || "Ad created successfully!",
@@ -137,6 +134,7 @@ const AddAds = () => {
             variant="outlined"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            size={isMobile ? "small" : "medium"}
           />
 
           {/* Start Date */}
@@ -157,6 +155,7 @@ const AddAds = () => {
             variant="outlined"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
+            size={isMobile ? "small" : "medium"}
           />
 
           {/* End Date */}
@@ -177,6 +176,7 @@ const AddAds = () => {
             variant="outlined"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
+            size={isMobile ? "small" : "medium"}
           />
 
           {/* Image Upload */}
@@ -258,6 +258,21 @@ const AddAds = () => {
           </Button>
         </Stack>
       </form>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -15,10 +15,15 @@ import {
   Switch,
   IconButton,
   TextField,
-  Button,
-  Alert,
-  Snackbar,
   Tooltip,
+  Snackbar,
+  Alert,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { Edit, Delete, Save, Close } from "@mui/icons-material";
 import API from "../service/api";
@@ -34,11 +39,13 @@ const AdList = () => {
     severity: "success",
   });
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  // ✅ Fetch Ads
   const fetchAds = async () => {
     try {
       const res = await API.get("/ads");
@@ -54,7 +61,6 @@ const AdList = () => {
     fetchAds();
   }, []);
 
-  // ✅ Toggle Active/Inactive
   const handleToggle = async (adId, currentStatus) => {
     try {
       setUpdatingId(adId);
@@ -65,7 +71,13 @@ const AdList = () => {
         }
       }
       await API.put(`/ads/${adId}/status`, { isActive: !currentStatus });
+
       await fetchAds();
+      setSnackbar({
+        open: true,
+        message: "Status updated successfully!!",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Error updating ad status:", error);
       setSnackbar({
@@ -78,16 +90,14 @@ const AdList = () => {
     }
   };
 
-  // ✅ Delete Ad
   const handleDelete = async (adId) => {
     if (!window.confirm("Are you sure you want to delete this ad?")) return;
-
     try {
       await API.delete(`/ads/${adId}`);
       setAds((prev) => prev.filter((ad) => ad._id !== adId));
       setSnackbar({
         open: true,
-        message: "ad deleted successfully!!",
+        message: "Ad deleted successfully!!",
         severity: "success",
       });
     } catch (error) {
@@ -100,17 +110,14 @@ const AdList = () => {
     }
   };
 
-  // ✅ Start Editing Ad
   const startEditing = (ad) => {
     setEditingAd({ ...ad });
   };
 
-  // ✅ Cancel Editing
   const cancelEditing = () => {
     setEditingAd(null);
   };
 
-  // ✅ Save Updated Ad
   const handleUpdate = async () => {
     if (!editingAd.title || !editingAd.startDate || !editingAd.endDate) {
       setSnackbar({
@@ -120,7 +127,6 @@ const AdList = () => {
       });
       return;
     }
-
     try {
       setUpdatingId(editingAd._id);
       await API.put(`/ads/${editingAd._id}`, {
@@ -132,7 +138,7 @@ const AdList = () => {
       setEditingAd(null);
       setSnackbar({
         open: true,
-        message: "ad updated successfully!!",
+        message: "Ad updated successfully!!",
         severity: "success",
       });
     } catch (error) {
@@ -148,23 +154,24 @@ const AdList = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4, bgcolor: "#EBEBEB" } }}>
+    <Box sx={{ p: { xs: 2, sm: 4 }, minHeight: "100vh" }}>
       <Typography
         variant="h4"
         fontWeight="bold"
         color="#EF7722"
-        textAlign="start"
         mb={3}
-        fontFamily={"poppins"}
+        fontFamily="poppins"
+        textAlign={isMobile ? "center" : "left"}
       >
         Advertisement List
       </Typography>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" mt={5}>
+        <Box display="flex" justifyContent="center" mt={5}>
           <CircularProgress />
         </Box>
-      ) : (
+      ) : !isMobile ? (
+        // Desktop Table
         <TableContainer component={Paper} elevation={3}>
           <Table>
             <TableHead>
@@ -192,7 +199,6 @@ const AdList = () => {
                 </TableCell>
               </TableRow>
             </TableHead>
-
             <TableBody>
               {ads.length === 0 ? (
                 <TableRow>
@@ -283,7 +289,7 @@ const AdList = () => {
                     <TableCell align="center">
                       {editingAd && editingAd._id === ad._id ? (
                         <>
-                          <Tooltip title="save">
+                          <Tooltip title="Save">
                             <IconButton
                               color="success"
                               onClick={handleUpdate}
@@ -292,7 +298,7 @@ const AdList = () => {
                               <Save />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="close">
+                          <Tooltip title="Cancel">
                             <IconButton color="error" onClick={cancelEditing}>
                               <Close />
                             </IconButton>
@@ -300,7 +306,7 @@ const AdList = () => {
                         </>
                       ) : (
                         <>
-                          <Tooltip title="edit">
+                          <Tooltip title="Edit">
                             <IconButton
                               color="primary"
                               onClick={() => startEditing(ad)}
@@ -308,7 +314,7 @@ const AdList = () => {
                               <Edit />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="delete">
+                          <Tooltip title="Delete">
                             <IconButton
                               color="error"
                               onClick={() => handleDelete(ad._id)}
@@ -325,7 +331,129 @@ const AdList = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      ) : (
+        // Mobile / Tablet Cards
+        <Box display="flex" flexDirection="column" gap={2}>
+          {ads.map((ad) => (
+            <Card key={ad._id} variant="outlined" sx={{ p: 2, boxShadow: 3 }}>
+              <CardContent>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={1}
+                >
+                  {editingAd && editingAd._id === ad._id ? (
+                    <TextField
+                      value={editingAd.title}
+                      onChange={(e) =>
+                        setEditingAd({ ...editingAd, title: e.target.value })
+                      }
+                      fullWidth
+                      size="small"
+                    />
+                  ) : (
+                    <Typography variant="h6" fontWeight="bold">
+                      {ad.title}
+                    </Typography>
+                  )}
+                  <Avatar
+                    src={ad.imageUrl}
+                    variant="rounded"
+                    sx={{ width: 50, height: 50 }}
+                  />
+                </Box>
+
+                <Typography variant="body2" color="textSecondary">
+                  Start:{" "}
+                  {editingAd && editingAd._id === ad._id ? (
+                    <TextField
+                      type="date"
+                      value={editingAd.startDate}
+                      onChange={(e) =>
+                        setEditingAd({
+                          ...editingAd,
+                          startDate: e.target.value,
+                        })
+                      }
+                      size="small"
+                      fullWidth
+                    />
+                  ) : (
+                    new Date(ad.startDate).toLocaleDateString()
+                  )}
+                </Typography>
+
+                <Typography variant="body2" color="textSecondary" mb={1}>
+                  End:{" "}
+                  {editingAd && editingAd._id === ad._id ? (
+                    <TextField
+                      type="date"
+                      value={editingAd.endDate}
+                      onChange={(e) =>
+                        setEditingAd({ ...editingAd, endDate: e.target.value })
+                      }
+                      size="small"
+                      fullWidth
+                    />
+                  ) : (
+                    new Date(ad.endDate).toLocaleDateString()
+                  )}
+                </Typography>
+
+                {editingAd && editingAd._id === ad._id ? (
+                  <Box display="flex" gap={1} mt={1}>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={handleUpdate}
+                      disabled={updatingId === ad._id}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={cancelEditing}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mt={1}
+                  >
+                    <Switch
+                      checked={ad.isActive}
+                      onChange={() => handleToggle(ad._id, ad.isActive)}
+                      color="success"
+                      disabled={updatingId === ad._id}
+                    />
+                    <Box>
+                      <IconButton
+                        color="primary"
+                        onClick={() => startEditing(ad)}
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDelete(ad._id)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
       )}
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
