@@ -1,6 +1,5 @@
 // src/pages/AddAds.jsx
 import React, { useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -9,11 +8,11 @@ import {
   Stack,
   Card,
   CardMedia,
-  useTheme,
-  useMediaQuery,
+  Divider,
   Snackbar,
   Alert,
-  Divider,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import API from "../service/api";
 
@@ -44,6 +43,7 @@ const AddAds = () => {
       setPreview(URL.createObjectURL(file));
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title || !image || !startDate || !endDate) {
@@ -61,23 +61,21 @@ const AddAds = () => {
       formData.append("image", image);
       formData.append("startDate", startDate);
       formData.append("endDate", endDate);
-      console.log(formData);
+
       const res = await API.post("/ads", formData);
-      console.log(formData);
+
       setSnackbar({
         open: true,
         message: res.data.message || "Ad created successfully!",
         severity: "success",
       });
 
-      // Reset form
       setTitle("");
       setImage(null);
       setPreview(null);
       setStartDate("");
       setEndDate("");
     } catch (error) {
-      console.error("Ad creation error:", error);
       setSnackbar({
         open: true,
         message: error.response?.data?.message || "Failed to create ad",
@@ -91,39 +89,40 @@ const AddAds = () => {
   return (
     <Box
       sx={{
-        p: { xs: 2, sm: 3, md: 4 },
+        p: { xs: 2, sm: 4 },
         display: "flex",
         flexDirection: "column",
         alignItems: { xs: "center", md: "flex-start" },
       }}
     >
-      {/* ✅ Page Heading */}
+      {/* Page Heading */}
       <Typography
         variant="h4"
-        FontFamily={"poppins"}
         sx={{
           mb: { xs: 2, sm: 3 },
-          fontSize: { xs: "1.8rem", sm: "2rem", md: "2.4rem" },
           fontWeight: "bold",
+          fontFamily: "'Poppins'",
           textAlign: { xs: "center", md: "left" },
           color: "#EF7722",
-          fontFamily: "poppins",
+          letterSpacing: 0.5,
+          fontSize: { xs: 25 },
         }}
       >
         Add Advertisement
       </Typography>
-      <Divider sx={{ mt: 3, color: "#FA812F" }} />
+
+      <Divider sx={{ width: "100%", mb: 4, borderColor: "#FAA533" }} />
 
       <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: 500 }}>
         <Stack spacing={isMobile ? 2 : 3}>
           {/* Ad Title */}
           <Typography
             variant="subtitle1"
-            FontFamily={"poppins"}
             sx={{
               fontWeight: 600,
               color: "text.secondary",
               fontSize: { xs: "0.9rem", sm: "1rem" },
+              fontFamily: "'Poppins', sans-serif",
             }}
           >
             Ad Title
@@ -144,7 +143,6 @@ const AddAds = () => {
               fontWeight: 600,
               color: "text.secondary",
               fontSize: { xs: "0.9rem", sm: "1rem" },
-              mt: 1,
             }}
           >
             Start Date
@@ -165,7 +163,6 @@ const AddAds = () => {
               fontWeight: 600,
               color: "text.secondary",
               fontSize: { xs: "0.9rem", sm: "1rem" },
-              mt: 1,
             }}
           >
             End Date
@@ -185,8 +182,7 @@ const AddAds = () => {
             sx={{
               fontWeight: 600,
               color: "text.secondary",
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-              fontFamily: "Sans-Serif ",
+              fontFamily: "'Poppins', sans-serif",
               mt: 2,
             }}
           >
@@ -202,7 +198,10 @@ const AddAds = () => {
               "&:hover": {
                 background: "linear-gradient(90deg, #FA812F, #ED3F27)",
               },
-              FontFamily: "poppins",
+              fontFamily: "'Poppins', sans-serif",
+              borderRadius: 2,
+              boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+              py: { xs: 1, sm: 1.2 },
             }}
           >
             Choose File
@@ -220,8 +219,10 @@ const AddAds = () => {
               sx={{
                 maxWidth: { xs: "100%", sm: 320 },
                 mt: 2,
-                boxShadow: 3,
-                borderRadius: 2,
+                borderRadius: 3,
+                boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                transition: "transform 0.3s",
+                "&:hover": { transform: "scale(1.02)" },
               }}
             >
               <CardMedia
@@ -243,15 +244,18 @@ const AddAds = () => {
             disabled={loading}
             sx={{
               mt: 3,
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-              py: { xs: 1, sm: 1.2 },
               width: { xs: "100%", sm: "50%" },
-              alignSelf: { xs: "center", md: "flex-start" },
-              FontFamily: "poppins",
+              fontSize: { xs: "0.9rem", sm: "1rem" },
+              fontWeight: 600,
+              fontFamily: "'Poppins', sans-serif",
               background: "linear-gradient(90deg, #FAA533, #EF7722)",
               "&:hover": {
                 background: "linear-gradient(90deg, #FA812F, #ED3F27)",
               },
+              borderRadius: 2,
+              py: { xs: 1, sm: 1.2 },
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              alignSelf: { xs: "center", md: "flex-start" },
             }}
           >
             {loading ? "Submitting..." : "Submit Ad"}
@@ -259,6 +263,7 @@ const AddAds = () => {
         </Stack>
       </form>
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -268,7 +273,7 @@ const AddAds = () => {
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ width: "100%" }}
+          sx={{ width: "100%", fontFamily: "'Poppins', sans-serif" }}
         >
           {snackbar.message}
         </Alert>

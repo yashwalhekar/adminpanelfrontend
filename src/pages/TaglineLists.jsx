@@ -19,12 +19,17 @@ import {
   Checkbox,
   Card,
   CardContent,
-  CardActions,
-  Button,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Edit, Delete, Save, Close } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Save,
+  Close,
+  ArrowBack,
+  ArrowForward,
+} from "@mui/icons-material";
 import API from "../service/api";
 
 const TaglineLists = () => {
@@ -37,6 +42,9 @@ const TaglineLists = () => {
     severity: "success",
   });
 
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 5; // desktop/tablet rows per page
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -48,7 +56,7 @@ const TaglineLists = () => {
     try {
       const res = await API.get("/tagline");
       setTaglines(res.data || []);
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: "Failed to load taglines",
@@ -66,7 +74,7 @@ const TaglineLists = () => {
         severity: "success",
       });
       fetchTaglines();
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: "Error updating status",
@@ -95,7 +103,7 @@ const TaglineLists = () => {
       });
       setEditingId(null);
       fetchTaglines();
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: "Error updating tagline",
@@ -103,8 +111,6 @@ const TaglineLists = () => {
       });
     }
   };
-
-  const handleCancel = () => setEditingId(null);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this tagline?"))
@@ -117,7 +123,7 @@ const TaglineLists = () => {
         severity: "success",
       });
       fetchTaglines();
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: "Error deleting tagline",
@@ -126,318 +132,383 @@ const TaglineLists = () => {
     }
   };
 
+  const handleCancel = () => setEditingId(null);
+
+  // pagination helpers
+  const totalPages = Math.ceil(taglines.length / (isMobile ? 1 : rowsPerPage));
+
+  const handlePrev = () => {
+    setPage((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  const handleNext = () => {
+    setPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev));
+  };
+
+  // Slice taglines for current page
+  const paginatedTaglines = isMobile
+    ? taglines.slice(page, page + 1)
+    : taglines.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, minHeight: "100vh" }}>
+    <Box sx={{ p: { xs: 2, sm: 4 }, fontFamily: "Poppins" }}>
       <Typography
         variant={isMobile ? "h5" : "h4"}
-        fontWeight="bold"
-        color="#EF7722"
-        mb={3}
-        textAlign={isMobile ? "center" : "left"}
-        fontFamily={"poppins"}
+        sx={{
+          mb: 3,
+          fontWeight: 700,
+          color: "#EF7722",
+          textAlign: isMobile ? "center" : "left",
+          letterSpacing: "0.5px",
+          fontFamily: "Poppins",
+        }}
       >
         Tagline List
       </Typography>
 
-      {/* Desktop Table */}
+      {/* ✅ Desktop & Tablet View */}
       {!isMobile && (
-        <TableContainer
-          component={Paper}
-          elevation={3}
-          sx={{ borderRadius: 3 }}
-        >
-          <Table>
-            <TableHead sx={{ backgroundColor: "#FAA533" }}>
-              <TableRow>
-                <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                  #
-                </TableCell>
-                <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                  Text
-                </TableCell>
-                <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                  Start Date
-                </TableCell>
-                <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                  End Date
-                </TableCell>
-                <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                  Status
-                </TableCell>
-                <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {taglines.length > 0 ? (
-                taglines.map((tagline, index) => (
-                  <TableRow key={tagline._id} hover>
-                    <TableCell>{index + 1}</TableCell>
-                    {editingId === tagline._id ? (
-                      <>
-                        <TableCell>
-                          <TextField
-                            fullWidth
-                            size="small"
-                            value={editValues.text}
-                            onChange={(e) =>
-                              setEditValues({
-                                ...editValues,
-                                text: e.target.value,
-                              })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            type="date"
-                            size="small"
-                            fullWidth
-                            value={editValues.startDate}
-                            onChange={(e) =>
-                              setEditValues({
-                                ...editValues,
-                                startDate: e.target.value,
-                              })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            type="date"
-                            size="small"
-                            fullWidth
-                            value={editValues.endDate}
-                            onChange={(e) =>
-                              setEditValues({
-                                ...editValues,
-                                endDate: e.target.value,
-                              })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Checkbox
-                            checked={editValues.isActive}
-                            onChange={(e) =>
-                              setEditValues({
-                                ...editValues,
-                                isActive: e.target.checked,
-                              })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Tooltip title="Save">
-                            <IconButton
-                              color="success"
-                              onClick={() => handleSave(tagline._id)}
-                            >
-                              <Save />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Cancel">
-                            <IconButton color="error" onClick={handleCancel}>
-                              <Close />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </>
-                    ) : (
-                      <>
-                        <TableCell>{tagline.text}</TableCell>
-                        <TableCell>
-                          {tagline.startDate
-                            ? new Date(tagline.startDate).toLocaleDateString()
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {tagline.endDate
-                            ? new Date(tagline.endDate).toLocaleDateString()
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <Switch
-                            checked={tagline.isActive}
-                            color="primary"
-                            onChange={() =>
-                              handleToggleStatus(tagline._id, tagline.isActive)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Tooltip title="Edit">
-                            <IconButton
-                              color="primary"
-                              onClick={() => handleEditClick(tagline)}
-                            >
-                              <Edit />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton
-                              color="error"
-                              onClick={() => handleDelete(tagline._id)}
-                            >
-                              <Delete />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                ))
-              ) : (
+        <>
+          <TableContainer
+            component={Paper}
+            elevation={4}
+            sx={{
+              borderRadius: 3,
+              overflow: "hidden",
+              boxShadow: "0 6px 20px rgba(239, 119, 34, 0.1)",
+            }}
+          >
+            <Table>
+              <TableHead
+                sx={{
+                  background: "linear-gradient(90deg, #FAA533, #EF7722)",
+                }}
+              >
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No taglines found
-                  </TableCell>
+                  {[
+                    "#",
+                    "Text",
+                    "Start Date",
+                    "End Date",
+                    "Status",
+                    "Actions",
+                  ].map((header) => (
+                    <TableCell
+                      key={header}
+                      sx={{
+                        color: "white",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+              </TableHead>
 
-      {/* Mobile Cards */}
-      {isMobile && taglines.length > 0 && (
-        <Box display="flex" flexDirection="column" gap={2}>
-          {taglines.map((tagline, index) => (
-            <Card
-              key={tagline._id}
-              variant="outlined"
-              sx={{ p: 2, boxShadow: 3 }}
-            >
-              <CardContent>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={1}
-                >
-                  <Typography fontWeight="bold">
-                    {index + 1}.{" "}
-                    {editingId === tagline._id ? (
-                      <TextField
-                        value={editValues.text}
-                        onChange={(e) =>
-                          setEditValues({ ...editValues, text: e.target.value })
-                        }
-                        fullWidth
-                        size="small"
-                      />
-                    ) : (
-                      tagline.text
-                    )}
-                  </Typography>
-                </Box>
-
-                <Typography variant="body2" color="textSecondary">
-                  Start:{" "}
-                  {editingId === tagline._id ? (
-                    <TextField
-                      type="date"
-                      value={editValues.startDate}
-                      onChange={(e) =>
-                        setEditValues({
-                          ...editValues,
-                          startDate: e.target.value,
-                        })
-                      }
-                      fullWidth
-                      size="small"
-                    />
-                  ) : tagline.startDate ? (
-                    new Date(tagline.startDate).toLocaleDateString()
-                  ) : (
-                    "-"
-                  )}
-                </Typography>
-
-                <Typography variant="body2" color="textSecondary" mb={1}>
-                  End:{" "}
-                  {editingId === tagline._id ? (
-                    <TextField
-                      type="date"
-                      value={editValues.endDate}
-                      onChange={(e) =>
-                        setEditValues({
-                          ...editValues,
-                          endDate: e.target.value,
-                        })
-                      }
-                      fullWidth
-                      size="small"
-                    />
-                  ) : tagline.endDate ? (
-                    new Date(tagline.endDate).toLocaleDateString()
-                  ) : (
-                    "-"
-                  )}
-                </Typography>
-
-                {editingId === tagline._id ? (
-                  <Box display="flex" gap={1} mt={1}>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleSave(tagline._id)}
+              <TableBody>
+                {paginatedTaglines.length > 0 ? (
+                  paginatedTaglines.map((tagline, index) => (
+                    <TableRow
+                      key={tagline._id}
+                      hover
+                      sx={{
+                        "&:nth-of-type(odd)": {
+                          backgroundColor: "rgba(250,165,51,0.05)",
+                        },
+                        "&:hover": {
+                          backgroundColor: "rgba(239,119,34,0.08)",
+                          transition: "0.3s",
+                        },
+                      }}
                     >
-                      Save
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={handleCancel}
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
+                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                      {editingId === tagline._id ? (
+                        <>
+                          <TableCell>
+                            <TextField
+                              fullWidth
+                              size="small"
+                              value={editValues.text}
+                              onChange={(e) =>
+                                setEditValues({
+                                  ...editValues,
+                                  text: e.target.value,
+                                })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              type="date"
+                              size="small"
+                              fullWidth
+                              value={editValues.startDate}
+                              onChange={(e) =>
+                                setEditValues({
+                                  ...editValues,
+                                  startDate: e.target.value,
+                                })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              type="date"
+                              size="small"
+                              fullWidth
+                              value={editValues.endDate}
+                              onChange={(e) =>
+                                setEditValues({
+                                  ...editValues,
+                                  endDate: e.target.value,
+                                })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Checkbox
+                              checked={editValues.isActive}
+                              onChange={(e) =>
+                                setEditValues({
+                                  ...editValues,
+                                  isActive: e.target.checked,
+                                })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title="Save">
+                              <IconButton
+                                color="success"
+                                onClick={() => handleSave(tagline._id)}
+                              >
+                                <Save />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Cancel">
+                              <IconButton color="error" onClick={handleCancel}>
+                                <Close />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell>{tagline.text}</TableCell>
+                          <TableCell>
+                            {tagline.startDate
+                              ? new Date(tagline.startDate).toLocaleDateString()
+                              : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {tagline.endDate
+                              ? new Date(tagline.endDate).toLocaleDateString()
+                              : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={tagline.isActive}
+                              color="warning"
+                              onChange={() =>
+                                handleToggleStatus(
+                                  tagline._id,
+                                  tagline.isActive
+                                )
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title="Edit">
+                              <IconButton
+                                color="primary"
+                                onClick={() => handleEditClick(tagline)}
+                              >
+                                <Edit />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton
+                                color="error"
+                                onClick={() => handleDelete(tagline._id)}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  ))
                 ) : (
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mt={1}
-                  >
-                    <Switch
-                      checked={tagline.isActive}
-                      color="primary"
-                      onChange={() =>
-                        handleToggleStatus(tagline._id, tagline.isActive)
-                      }
-                    />
-                    <Box>
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleEditClick(tagline)}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => handleDelete(tagline._id)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  </Box>
+                  <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                      No taglines found
+                    </TableCell>
+                  </TableRow>
                 )}
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination Arrows */}
+          {taglines.length > rowsPerPage && (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              mt={3}
+            >
+              <IconButton
+                onClick={handlePrev}
+                disabled={page === 0}
+                sx={{ color: "#EF7722" }}
+              >
+                <ArrowBack fontSize="large" />
+              </IconButton>
+              <Typography
+                sx={{ mx: 2, fontWeight: 600, fontFamily: "Poppins" }}
+              >
+                Page {page + 1} of {totalPages}
+              </Typography>
+              <IconButton
+                onClick={handleNext}
+                disabled={page >= totalPages - 1}
+                sx={{ color: "#EF7722" }}
+              >
+                <ArrowForward fontSize="large" />
+              </IconButton>
+            </Box>
+          )}
+        </>
       )}
 
-      {/* Snackbar */}
+      {/* ✅ Mobile View */}
+      {isMobile && paginatedTaglines.length > 0 && (
+        <>
+          <Card
+            sx={{
+              borderRadius: "14px",
+              p: 2,
+              background: "linear-gradient(180deg, #fff, #fffaf5)",
+              border: "1px solid rgba(239,119,34,0.2)",
+              transition: "0.3s",
+              "&:hover": {
+                transform: "translateY(-4px)",
+                boxShadow: "0 10px 24px rgba(239,119,34,0.25)",
+              },
+            }}
+          >
+            <CardContent>
+              <Typography
+                fontWeight="bold"
+                sx={{ color: "#EF7722", fontSize: "1.1rem" }}
+                fontFamily={"Poppins"}
+              >
+                {page + 1}. {paginatedTaglines[0].text}
+              </Typography>
+
+              <Typography variant="body2" sx={{ mt: 1 }} fontFamily={"Poppins"}>
+                <strong>Start:</strong>{" "}
+                {paginatedTaglines[0].startDate
+                  ? new Date(
+                      paginatedTaglines[0].startDate
+                    ).toLocaleDateString()
+                  : "-"}
+              </Typography>
+
+              <Typography variant="body2" fontFamily={"Poppins"}>
+                <strong>End:</strong>{" "}
+                {paginatedTaglines[0].endDate
+                  ? new Date(paginatedTaglines[0].endDate).toLocaleDateString()
+                  : "-"}
+              </Typography>
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mt={2}
+              >
+                <Switch
+                  checked={paginatedTaglines[0].isActive}
+                  color="warning"
+                  onChange={() =>
+                    handleToggleStatus(
+                      paginatedTaglines[0]._id,
+                      paginatedTaglines[0].isActive
+                    )
+                  }
+                />
+                <Box>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleEditClick(paginatedTaglines[0])}
+                  >
+                    <Edit />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDelete(paginatedTaglines[0]._id)}
+                  >
+                    <Delete />
+                  </IconButton>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+
+          {/* Mobile Pagination Arrows */}
+          {taglines.length > 1 && (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              mt={2}
+            >
+              <IconButton
+                onClick={handlePrev}
+                disabled={page === 0}
+                sx={{ color: "#EF7722" }}
+              >
+                <ArrowBack fontSize="large" />
+              </IconButton>
+              <Typography
+                sx={{ mx: 2, fontWeight: 600, fontFamily: "Poppins" }}
+              >
+                {page + 1}/{totalPages}
+              </Typography>
+              <IconButton
+                onClick={handleNext}
+                disabled={page >= totalPages - 1}
+                sx={{ color: "#EF7722" }}
+              >
+                <ArrowForward fontSize="large" />
+              </IconButton>
+            </Box>
+          )}
+        </>
+      )}
+
+      {/* ✅ Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+        <Alert
+          severity={snackbar.severity}
+          sx={{
+            fontFamily: "Poppins, sans-serif",
+            borderRadius: "8px",
+            fontSize: "0.9rem",
+          }}
+        >
+          {snackbar.message}
+        </Alert>
       </Snackbar>
     </Box>
   );
