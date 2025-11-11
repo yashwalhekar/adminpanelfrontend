@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import API from "../service/api";
-import { Divider } from "@mui/material";
 
 const Testimonials = () => {
   const [formData, setFormData] = useState({
