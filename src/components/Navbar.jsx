@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React, { useState } from "react";
 import {
   AppBar,
@@ -15,15 +14,22 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  Collapse,
   Menu,
   MenuItem,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import LogoutIcon from "@mui/icons-material/Logout";
+import {
+  ExpandLess,
+  ExpandMore,
+  Dashboard as DashboardIcon,
+  AddCircleOutline,
+  ViewList,
+  FormatQuote,
+  Loyalty,
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  Logout,
+} from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -32,28 +38,27 @@ const Navbar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null); // menu anchor
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [openAds, setOpenAds] = useState(false);
+  const [openTaglines, setOpenTaglines] = useState(false);
+  const [openTestimonials, setOpenTestimonials] = useState(false);
   const navigate = useNavigate();
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  // ✅ Open/close menu on avatar click
-  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
-  // ✅ Logout handler
   const handleLogout = () => {
     localStorage.removeItem("token");
     handleMenuClose();
     navigate("/login");
   };
 
-  // ✅ Drawer content
+  // ✅ Drawer Content
   const drawerContent = (
     <Box sx={{ textAlign: "center", mt: 2 }}>
       <List>
+        {/* Dashboard */}
         <ListItemButton
           component={Link}
           to="/dashboard"
@@ -63,34 +68,86 @@ const Navbar = () => {
           <ListItemText primary="Dashboard" />
         </ListItemButton>
 
-        <ListItemButton
-          component={Link}
-          to="/add-ads"
-          onClick={() => isMobile && handleDrawerToggle()}
-        >
-          <AddCircleOutlineIcon sx={{ mr: 2, color: "#FAA533" }} />
-          <ListItemText primary="Add Ads" />
+        {/* Ads Management */}
+        <ListItemButton onClick={() => setOpenAds(!openAds)}>
+          <Loyalty sx={{ mr: 2, color: "#FAA533" }} />
+          <ListItemText primary="Ads Management" />
+          {openAds ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
+        <Collapse in={openAds} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/add-ads"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <AddCircleOutline sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Add Ads" />
+            </ListItemButton>
 
-        <ListItemButton
-          component={Link}
-          to="/add-tagline"
-          onClick={() => isMobile && handleDrawerToggle()}
-        >
-          <AddCircleOutlineIcon sx={{ mr: 2, color: "#FAA533" }} />
-          <ListItemText primary="Add Taglines" />
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/allads"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <ViewList sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Manage Ads" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {/* Taglines Management */}
+        <ListItemButton onClick={() => setOpenTaglines(!openTaglines)}>
+          <FormatQuote sx={{ mr: 2, color: "#FAA533" }} />
+          <ListItemText primary="Taglines Management" />
+          {openTaglines ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
+        <Collapse in={openTaglines} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/add-tagline"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <AddCircleOutline sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Add Tagline" />
+            </ListItemButton>
+          </List>
+        </Collapse>
 
-        <ListItemButton
-          component={Link}
-          to="/allads"
-          onClick={() => isMobile && handleDrawerToggle()}
-        >
-          <ViewListIcon sx={{ mr: 2, color: "#FAA533" }} />
-          <ListItemText primary="Manage Ads" />
+        {/* Testimonials Management */}
+        <ListItemButton onClick={() => setOpenTestimonials(!openTestimonials)}>
+          <FormatQuote sx={{ mr: 2, color: "#FAA533" }} />
+          <ListItemText primary="Testimonials" />
+          {openTestimonials ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
+        <Collapse in={openTestimonials} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/add-testimonials"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <AddCircleOutline sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Add Testimonial" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/testimonials"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <ViewList sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Manage Testimonials" />
+            </ListItemButton>
+          </List>
+        </Collapse>
 
-        <Divider sx={{ my: 1 }} />
+        <Divider sx={{ my: 2 }} />
       </List>
     </Box>
   );
@@ -98,8 +155,6 @@ const Navbar = () => {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-
-      {/* ✅ AppBar */}
       <AppBar
         position="fixed"
         sx={{
@@ -107,31 +162,33 @@ const Navbar = () => {
           bgcolor: "#EF7722",
         }}
       >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
           {isMobile && (
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={handleDrawerToggle}
-            >
+            <IconButton color="inherit" onClick={handleDrawerToggle}>
               <MenuIcon />
             </IconButton>
           )}
 
           <Typography
-            variant="h5"
+            variant={isMobile ? "h6" : "h5"}
             noWrap
-            component="div"
-            fontFamily={"poppins"}
+            sx={{ fontFamily: "Poppins" }}
           >
             Admin Panel
           </Typography>
 
-          {/* ✅ Avatar with Logout Menu */}
+          {/* Avatar + Logout */}
           <Box>
             <IconButton onClick={handleMenuOpen}>
               <Avatar
-                sx={{ bgcolor: "white", color: "#EF7722", fontWeight: "bold" }}
+                sx={{
+                  bgcolor: "white",
+                  color: "#EF7722",
+                  fontWeight: "bold",
+                  width: 35,
+                  height: 35,
+                  fontSize: 14,
+                }}
               >
                 AD
               </Avatar>
@@ -141,17 +198,11 @@ const Navbar = () => {
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
               <MenuItem onClick={handleLogout}>
-                <LogoutIcon fontSize="small" sx={{ mr: 1, color: "red" }} />
+                <Logout sx={{ mr: 1, color: "red" }} fontSize="small" />
                 Logout
               </MenuItem>
             </Menu>
@@ -159,7 +210,7 @@ const Navbar = () => {
         </Toolbar>
       </AppBar>
 
-      {/* ✅ Drawer */}
+      {/* Drawer */}
       {isMobile ? (
         <Drawer
           variant="temporary"
@@ -169,7 +220,7 @@ const Navbar = () => {
           sx={{
             "& .MuiDrawer-paper": {
               width: drawerWidth,
-              boxSizing: "border-box",
+              bgcolor: "#FFF8F0",
             },
           }}
         >
@@ -188,9 +239,9 @@ const Navbar = () => {
             flexShrink: 0,
             [`& .MuiDrawer-paper`]: {
               width: drawerWidth,
-              boxSizing: "border-box",
-              height: "100vh",
               top: "64px",
+              bgcolor: "#FFF8F0",
+              height: "100vh",
             },
           }}
           open

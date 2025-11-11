@@ -1,19 +1,4 @@
-// src/pages/AddAds.jsx
 import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Stack,
-  Card,
-  CardMedia,
-  Divider,
-  Snackbar,
-  Alert,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
 import API from "../service/api";
 
 const AddAds = () => {
@@ -29,13 +14,6 @@ const AddAds = () => {
     severity: "success",
   });
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  };
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -46,6 +24,7 @@ const AddAds = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!title || !image || !startDate || !endDate) {
       setSnackbar({
         open: true,
@@ -54,6 +33,7 @@ const AddAds = () => {
       });
       return;
     }
+
     try {
       setLoading(true);
       const formData = new FormData();
@@ -83,127 +63,72 @@ const AddAds = () => {
       });
     } finally {
       setLoading(false);
+      setTimeout(() => setSnackbar({ ...snackbar, open: false }), 3000);
     }
   };
 
   return (
-    <Box
-      sx={{
-        p: { xs: 2, sm: 4 },
-        display: "flex",
-        flexDirection: "column",
-        alignItems: { xs: "center", md: "flex-start" },
-      }}
-    >
-      {/* Page Heading */}
-      <Typography
-        variant="h4"
-        sx={{
-          mb: { xs: 2, sm: 3 },
-          fontWeight: "bold",
-          fontFamily: "'Poppins'",
-          textAlign: { xs: "center", md: "left" },
-          color: "#EF7722",
-          letterSpacing: 0.5,
-          fontSize: { xs: 25 },
-        }}
+    <div className="flex flex-col items-center md:items-start px-4 sm:px-8 py-6 font-poppins">
+      {/* Heading */}
+      <h2
+        className="text-2xl md:text-3xl font-bold text-[#EF7722] mb-4 text-center md:text-left"
+        style={{ fontFamily: "Poppins" }}
       >
         Add Advertisement
-      </Typography>
+      </h2>
+      <div className="w-full border-b-2 border-[#FAA533] mb-8"></div>
 
-      <Divider sx={{ width: "100%", mb: 4, borderColor: "#FAA533" }} />
-
-      <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: 500 }}>
-        <Stack spacing={isMobile ? 2 : 3}>
-          {/* Ad Title */}
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              color: "text.secondary",
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-              fontFamily: "'Poppins', sans-serif",
-            }}
-          >
+      {/* Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 space-y-5"
+      >
+        {/* Title */}
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">
             Ad Title
-          </Typography>
-          <TextField
-            fullWidth
+          </label>
+          <input
+            type="text"
             placeholder="Enter ad title"
-            variant="outlined"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            size={isMobile ? "small" : "medium"}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
+        </div>
 
-          {/* Start Date */}
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              color: "text.secondary",
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-            }}
-          >
+        {/* Start Date */}
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">
             Start Date
-          </Typography>
-          <TextField
-            fullWidth
+          </label>
+          <input
             type="date"
-            variant="outlined"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            size={isMobile ? "small" : "medium"}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
+        </div>
 
-          {/* End Date */}
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              color: "text.secondary",
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-            }}
-          >
+        {/* End Date */}
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">
             End Date
-          </Typography>
-          <TextField
-            fullWidth
+          </label>
+          <input
             type="date"
-            variant="outlined"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            size={isMobile ? "small" : "medium"}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
+        </div>
 
-          {/* Image Upload */}
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              color: "text.secondary",
-              fontFamily: "'Poppins', sans-serif",
-              mt: 2,
-            }}
-          >
+        {/* Image Upload */}
+        <div>
+          <label className="block text-gray-700 font-semibold mb-2">
             Upload Image
-          </Typography>
-          <Button
-            variant="contained"
-            component="label"
-            size={isMobile ? "small" : "medium"}
-            sx={{
-              width: { xs: "100%", sm: "50%" },
-              background: "linear-gradient(90deg, #FAA533, #EF7722)",
-              "&:hover": {
-                background: "linear-gradient(90deg, #FA812F, #ED3F27)",
-              },
-              fontFamily: "'Poppins', sans-serif",
-              borderRadius: 2,
-              boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-              py: { xs: 1, sm: 1.2 },
-            }}
-          >
+          </label>
+          <label className="cursor-pointer bg-gradient-to-r from-[#FAA533] to-[#EF7722] text-white px-4 py-2 rounded-lg shadow-md hover:from-[#FA812F] hover:to-[#ED3F27] inline-block">
             Choose File
             <input
               type="file"
@@ -211,74 +136,48 @@ const AddAds = () => {
               accept="image/*"
               onChange={handleImageChange}
             />
-          </Button>
+          </label>
 
-          {/* Image Preview */}
           {preview && (
-            <Card
-              sx={{
-                maxWidth: { xs: "100%", sm: 320 },
-                mt: 2,
-                borderRadius: 3,
-                boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
-                transition: "transform 0.3s",
-                "&:hover": { transform: "scale(1.02)" },
-              }}
-            >
-              <CardMedia
-                component="img"
-                image={preview}
+            <div className="mt-4 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
+              <img
+                src={preview}
                 alt="Ad Preview"
-                sx={{
-                  height: { xs: 180, sm: 220 },
-                  objectFit: "cover",
-                }}
+                className="w-full h-56 object-cover"
               />
-            </Card>
+            </div>
           )}
+        </div>
 
-          {/* Submit Button */}
-          <Button
-            variant="contained"
-            type="submit"
-            disabled={loading}
-            sx={{
-              mt: 3,
-              width: { xs: "100%", sm: "50%" },
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-              fontWeight: 600,
-              fontFamily: "'Poppins', sans-serif",
-              background: "linear-gradient(90deg, #FAA533, #EF7722)",
-              "&:hover": {
-                background: "linear-gradient(90deg, #FA812F, #ED3F27)",
-              },
-              borderRadius: 2,
-              py: { xs: 1, sm: 1.2 },
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              alignSelf: { xs: "center", md: "flex-start" },
-            }}
-          >
-            {loading ? "Submitting..." : "Submit Ad"}
-          </Button>
-        </Stack>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full mt-3 py-2.5 rounded-lg text-white font-semibold text-lg shadow-md transition-all duration-300 ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#FAA533] to-[#EF7722] hover:from-[#FA812F] hover:to-[#ED3F27]"
+          }`}
+        >
+          {loading ? "Submitting..." : "Submit Ad"}
+        </button>
       </form>
 
       {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%", fontFamily: "'Poppins', sans-serif" }}
+      {snackbar.open && (
+        <div
+          className={`fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium transition-all duration-300 ${
+            snackbar.severity === "success"
+              ? "bg-green-500"
+              : snackbar.severity === "error"
+              ? "bg-red-500"
+              : "bg-yellow-500"
+          }`}
         >
           {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+        </div>
+      )}
+    </div>
   );
 };
 

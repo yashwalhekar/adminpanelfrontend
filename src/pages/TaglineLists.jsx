@@ -29,6 +29,8 @@ import {
   Close,
   ArrowBack,
   ArrowForward,
+  ArrowForwardIos,
+  ArrowBackIos,
 } from "@mui/icons-material";
 import API from "../service/api";
 
@@ -473,7 +475,7 @@ const TaglineLists = () => {
                 disabled={page === 0}
                 sx={{ color: "#EF7722" }}
               >
-                <ArrowBack fontSize="large" />
+                <ArrowBackIos fontSize="medium" />
               </IconButton>
               <Typography
                 sx={{ mx: 2, fontWeight: 600, fontFamily: "Poppins" }}
@@ -485,7 +487,7 @@ const TaglineLists = () => {
                 disabled={page >= totalPages - 1}
                 sx={{ color: "#EF7722" }}
               >
-                <ArrowForward fontSize="large" />
+                <ArrowForwardIos fontSize="medium" />
               </IconButton>
             </Box>
           )}

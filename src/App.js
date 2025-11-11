@@ -13,6 +13,8 @@ import AddAds from "./pages/AddAds";
 import AdList from "./pages/AdList";
 import Login from "./pages/Login";
 import Tagline from "./pages/Tagline";
+import Testimonials from "./pages/Testimonials";
+import TestimonialList from "./pages/TestimonialList";
 
 // ✅ ProtectedRoute component
 const ProtectedRoute = ({ children }) => {
@@ -53,6 +55,14 @@ const App = () => {
                     <Route path="/add-ads" element={<AddAds />} />
                     <Route path="/allads" element={<AdList />} />
                     <Route path="/add-tagline" element={<Tagline />}></Route>
+                    <Route
+                      path="/add-testimonials"
+                      element={<Testimonials />}
+                    ></Route>
+                    <Route
+                      path="/testimonials"
+                      element={<TestimonialList />}
+                    ></Route>
                   </Routes>
                 </Box>
               </Box>

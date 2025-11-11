@@ -12,6 +12,7 @@ import {
   useMediaQuery,
   AppBar,
   Toolbar,
+  Fade,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import API from "../service/api";
@@ -38,12 +39,8 @@ const Login = () => {
 
     try {
       setLoading(true);
-      const res = await API.post("/auth/login", {
-        email,
-        password,
-      });
+      const res = await API.post("/auth/login", { email, password });
 
-      // ✅ Save token and user info
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
@@ -59,91 +56,140 @@ const Login = () => {
     <>
       <AppBar position="static" sx={{ bgcolor: "#EF7722" }}>
         <Toolbar>
-          <Typography variant="h5" sx={{ flexGrow: 1, fontFamily: "poppins" }}>
+          <Typography
+            variant={isMobile ? "h6" : "h5"}
+            sx={{
+              flexGrow: 1,
+              fontFamily: "Poppins",
+              fontWeight: 600,
+              letterSpacing: 0.5,
+            }}
+          >
             Admin Panel
           </Typography>
         </Toolbar>
       </AppBar>
+
       <Box
         sx={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #EF7722, #f4b942, #ffcc70)",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "100vh",
-          backgroundColor: "#f4f6f8",
           px: 2,
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            p: isMobile ? 3 : 5,
-            width: isMobile ? "100%" : isTablet ? "70%" : "400px",
-            borderRadius: 3,
-            textAlign: "center",
-          }}
-        >
-          <Typography
-            variant={isMobile ? "h5" : "h4"}
-            fontWeight="bold"
-            mb={3}
-            color="#EF7722"
-            fontFamily={"poppins"}
+        <Fade in={true} timeout={800}>
+          <Paper
+            elevation={6}
+            sx={{
+              p: isMobile ? 3 : 5,
+              width: isMobile ? "100%" : isTablet ? "70%" : "400px",
+              borderRadius: 4,
+              textAlign: "center",
+              backdropFilter: "blur(10px)",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+              transition: "transform 0.3s ease-in-out",
+              "&:hover": { transform: "translateY(-5px)" },
+            }}
           >
-            Login
-          </Typography>
-
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              sx={{ mb: 2 }}
-              size="small"
-            />
-
-            <TextField
-              fullWidth
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              sx={{ mb: 3 }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              size="small"
-            />
-
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={loading}
+            <Typography
+              variant={isMobile ? "h5" : "h4"}
+              fontWeight="bold"
+              mb={3}
               sx={{
-                py: 1.2,
-                fontSize: isMobile ? "0.9rem" : "1rem",
-                borderRadius: 2,
-                bgcolor: "#FAA533",
+                color: "#EF7722",
+                fontFamily: "Poppins",
+                textShadow: "1px 1px 2px rgba(239, 119, 34, 0.3)",
               }}
-              size="small"
             >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Login"
-              )}
-            </Button>
-          </form>
-        </Paper>
+              Welcome 👋
+            </Typography>
+
+            <Typography
+              variant="body2"
+              mb={3}
+              sx={{ color: "#555", fontFamily: "Poppins" }}
+            >
+              Please log in to continue to your dashboard
+            </Typography>
+
+            <form onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                sx={{ mb: 2 }}
+                size="small"
+                variant="outlined"
+              />
+
+              <TextField
+                fullWidth
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                sx={{ mb: 3 }}
+                size="small"
+                variant="outlined"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={loading}
+                sx={{
+                  py: 1.2,
+                  fontSize: isMobile ? "0.9rem" : "1rem",
+                  borderRadius: 2,
+                  bgcolor: "#EF7722",
+                  color: "#fff",
+                  fontWeight: 600,
+                  fontFamily: "Poppins",
+                  boxShadow: "0 4px 14px rgba(239,119,34,0.4)",
+                  "&:hover": {
+                    bgcolor: "#e66e1f",
+                    boxShadow: "0 6px 18px rgba(239,119,34,0.5)",
+                  },
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Login"
+                )}
+              </Button>
+            </form>
+
+            <Typography
+              variant="caption"
+              display="block"
+              mt={3}
+              color="text.secondary"
+              sx={{ fontFamily: "Poppins" }}
+            >
+              © {new Date().getFullYear()} Admin Portal. All rights reserved.
+            </Typography>
+          </Paper>
+        </Fade>
       </Box>
     </>
   );

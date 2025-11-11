@@ -10,6 +10,8 @@ import {
   Alert,
   Divider,
   Paper,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import API from "../service/api";
 import TaglineLists from "./TaglineLists";
@@ -24,6 +26,8 @@ const Tagline = () => {
     severity: "success",
   });
   const [refreshList, setRefreshList] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,10 +67,10 @@ const Tagline = () => {
     >
       {/* ✅ Page Heading */}
       <Typography
-        variant="h4"
+        variant={isMobile ? "h5" : "h4"}
         sx={{
           mb: { xs: 2, sm: 3 },
-          fontSize: { xs: 25, sm: "2.2rem" },
+
           fontWeight: 700,
           textAlign: { xs: "center", md: "left" },
           color: "#EF7722",
@@ -76,6 +80,8 @@ const Tagline = () => {
       >
         Add Tagline
       </Typography>
+
+      <Divider sx={{ width: "100%", mb: 4, borderColor: "#FAA533" }} />
 
       {/* ✅ Beautiful Glass-like Card */}
       <Paper

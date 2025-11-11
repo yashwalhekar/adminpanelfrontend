@@ -22,6 +22,7 @@ import {
   useTheme,
   useMediaQuery,
   TextField,
+  Divider,
 } from "@mui/material";
 import {
   Edit,
@@ -30,6 +31,8 @@ import {
   Close,
   ArrowBackIos,
   ArrowForwardIos,
+  ArrowBack,
+  ArrowForward,
 } from "@mui/icons-material";
 import API from "../service/api";
 
@@ -49,6 +52,8 @@ const AdList = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const ITEMS = isMobile ? 1 : ITEMS_PER_PAGE;
 
   const fetchAds = async () => {
     try {
@@ -147,10 +152,12 @@ const AdList = () => {
   const startEditing = (ad) => setEditingAd({ ...ad });
   const cancelEditing = () => setEditingAd(null);
 
-  // Pagination Logic
-  const startIndex = (page - 1) * ITEMS_PER_PAGE;
-  const currentAds = ads.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  const totalPages = Math.ceil(ads.length / ITEMS_PER_PAGE);
+  // ✅ Pagination logic
+  const totalPages = Math.ceil(ads.length / ITEMS);
+  const currentAds = ads.slice((page - 1) * ITEMS, page * ITEMS);
+
+  const handlePrev = () => setPage((prev) => Math.max(prev - 1, 1));
+  const handleNext = () => setPage((prev) => Math.min(prev + 1, totalPages));
 
   return (
     <Box
@@ -166,10 +173,12 @@ const AdList = () => {
         color="#EF7722"
         mb={3}
         textAlign={isMobile ? "center" : "left"}
-        fontFamily="Poppins, sans-serif"
+        fontFamily="Poppins"
       >
         Advertisement List
       </Typography>
+
+      <Divider sx={{ width: "100%", mb: 4, borderColor: "#FAA533" }} />
 
       {loading ? (
         <Box display="flex" justifyContent="center" mt={5}>
@@ -177,6 +186,7 @@ const AdList = () => {
         </Box>
       ) : !isMobile ? (
         <>
+          {/* ---------- DESKTOP TABLE VIEW ---------- */}
           <TableContainer
             component={Paper}
             elevation={4}
@@ -220,14 +230,7 @@ const AdList = () => {
                   </TableRow>
                 ) : (
                   currentAds.map((ad) => (
-                    <TableRow
-                      key={ad._id}
-                      hover
-                      sx={{
-                        transition: "background 0.3s",
-                        "&:hover": { backgroundColor: "#fff8f1" },
-                      }}
-                    >
+                    <TableRow key={ad._id} hover>
                       <TableCell>
                         {editingAd?._id === ad._id ? (
                           <TextField
@@ -340,7 +343,7 @@ const AdList = () => {
             </Table>
           </TableContainer>
 
-          {/* Pagination Arrows */}
+          {/* ---------- Desktop Pagination ---------- */}
           {totalPages > 1 && (
             <Box
               mt={3}
@@ -350,89 +353,188 @@ const AdList = () => {
               gap={2}
             >
               <IconButton
-                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                onClick={handlePrev}
                 disabled={page === 1}
+                sx={{ color: "#EF7722" }}
               >
-                <ArrowBackIos />
+                <ArrowBack fontSize="large" />
               </IconButton>
-              <Typography fontFamily="Poppins">
+              <Typography
+                sx={{ mx: 2, fontWeight: 600, fontFamily: "Poppins" }}
+              >
                 Page {page} of {totalPages}
               </Typography>
               <IconButton
-                onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                onClick={handleNext}
                 disabled={page === totalPages}
+                sx={{ color: "#EF7722" }}
               >
-                <ArrowForwardIos />
+                <ArrowForward fontSize="large" />
               </IconButton>
             </Box>
           )}
         </>
       ) : (
-        // Mobile Cards
-        <Box display="flex" flexDirection="column" gap={2}>
-          {ads.map((ad) => (
-            <Card
-              key={ad._id}
-              variant="outlined"
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-              }}
+        <>
+          {/* ---------- MOBILE CARD VIEW ---------- */}
+          <Box display="flex" flexDirection="column" gap={2}>
+            {currentAds.map((ad) => {
+              const isEditing = editingAd?._id === ad._id;
+              return (
+                <Card
+                  key={ad._id}
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
+                  }}
+                >
+                  <CardContent>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={1}
+                    >
+                      {isEditing ? (
+                        <TextField
+                          fullWidth
+                          size="small"
+                          value={editingAd.title}
+                          onChange={(e) =>
+                            setEditingAd({
+                              ...editingAd,
+                              title: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        <Typography variant="h6" fontFamily="Poppins">
+                          {ad.title}
+                        </Typography>
+                      )}
+
+                      <Avatar
+                        src={ad.imageUrl}
+                        variant="rounded"
+                        sx={{ width: 50, height: 50 }}
+                      />
+                    </Box>
+
+                    {isEditing ? (
+                      <>
+                        <TextField
+                          fullWidth
+                          type="date"
+                          size="small"
+                          value={editingAd.startDate.split("T")[0]}
+                          onChange={(e) =>
+                            setEditingAd({
+                              ...editingAd,
+                              startDate: e.target.value,
+                            })
+                          }
+                          sx={{ mb: 1 }}
+                        />
+                        <TextField
+                          fullWidth
+                          type="date"
+                          size="small"
+                          value={editingAd.endDate.split("T")[0]}
+                          onChange={(e) =>
+                            setEditingAd({
+                              ...editingAd,
+                              endDate: e.target.value,
+                            })
+                          }
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Typography variant="body2" fontFamily="Poppins">
+                          Start: {new Date(ad.startDate).toLocaleDateString()}
+                        </Typography>
+                        <Typography variant="body2" fontFamily="Poppins">
+                          End: {new Date(ad.endDate).toLocaleDateString()}
+                        </Typography>
+                      </>
+                    )}
+
+                    <Box
+                      mt={1}
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Switch
+                        checked={ad.isActive}
+                        onChange={() => handleToggle(ad._id, ad.isActive)}
+                        color="success"
+                        disabled={updatingId === ad._id}
+                      />
+
+                      {isEditing ? (
+                        <Box>
+                          <Tooltip title="Save">
+                            <IconButton color="success" onClick={handleUpdate}>
+                              <Save />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Cancel">
+                            <IconButton color="error" onClick={cancelEditing}>
+                              <Close />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      ) : (
+                        <Box>
+                          <Tooltip title="Edit">
+                            <IconButton
+                              color="primary"
+                              onClick={() => startEditing(ad)}
+                            >
+                              <Edit />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete">
+                            <IconButton
+                              color="error"
+                              onClick={() => handleDelete(ad._id)}
+                            >
+                              <Delete />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Box>
+
+          {/* ---------- Mobile Pagination ---------- */}
+          {totalPages > 1 && (
+            <Box
+              mt={2}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              gap={2}
             >
-              <CardContent>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={1}
-                >
-                  <Typography variant="h6" fontFamily="Poppins">
-                    {ad.title}
-                  </Typography>
-                  <Avatar
-                    src={ad.imageUrl}
-                    variant="rounded"
-                    sx={{ width: 50, height: 50 }}
-                  />
-                </Box>
-                <Typography variant="body2" fontFamily="Poppins">
-                  Start: {new Date(ad.startDate).toLocaleDateString()}
-                </Typography>
-                <Typography variant="body2" fontFamily="Poppins">
-                  End: {new Date(ad.endDate).toLocaleDateString()}
-                </Typography>
-                <Box
-                  mt={1}
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Switch
-                    checked={ad.isActive}
-                    onChange={() => handleToggle(ad._id, ad.isActive)}
-                    color="success"
-                    disabled={updatingId === ad._id}
-                  />
-                  <Box>
-                    <IconButton
-                      color="primary"
-                      onClick={() => startEditing(ad)}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDelete(ad._id)}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
+              <IconButton onClick={handlePrev} disabled={page === 1}>
+                <ArrowBackIos />
+              </IconButton>
+              <Typography fontFamily="Poppins">
+                Page {page} of {totalPages}
+              </Typography>
+              <IconButton onClick={handleNext} disabled={page === totalPages}>
+                <ArrowForwardIos />
+              </IconButton>
+            </Box>
+          )}
+        </>
       )}
 
       <Snackbar
