@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 
 const Dashboard = () => {

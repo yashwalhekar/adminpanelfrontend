@@ -78,7 +78,7 @@ const TestimonialList = () => {
   // ✅ Update Testimonial
   const handleSave = async (id) => {
     try {
-      const res = await API.put(`/testimonials/${id}`, editedData);
+      await API.put(`/testimonials/${id}`, editedData);
       setSnackbar({
         open: true,
         message: "Updated successfully!",
