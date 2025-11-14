@@ -58,7 +58,9 @@ const AdList = () => {
   const fetchAds = async () => {
     try {
       const res = await API.get("/ads");
-      setAds(res.data);
+      // Check if backend sends { ads: [...] } or a plain array
+      const adList = Array.isArray(res.data) ? res.data : res.data.ads;
+      setAds(adList || []); // ✅ always an array
     } catch (error) {
       console.error("Error fetching ads:", error);
     } finally {

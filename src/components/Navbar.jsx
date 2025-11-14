@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -18,6 +18,7 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
+
 import {
   ExpandLess,
   ExpandMore,
@@ -29,7 +30,10 @@ import {
   Menu as MenuIcon,
   Close as CloseIcon,
   Logout,
+  Article,
+  Group,
 } from "@mui/icons-material";
+
 import { Link, useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -37,11 +41,17 @@ const drawerWidth = 240;
 const Navbar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+
+  // Collapses
   const [openAds, setOpenAds] = useState(false);
   const [openTaglines, setOpenTaglines] = useState(false);
   const [openTestimonials, setOpenTestimonials] = useState(false);
+  const [openBlogs, setOpenBlogs] = useState(false);
+  const [openReachedUsers, setOpenReachedUsers] = useState(false);
+
   const navigate = useNavigate();
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -54,7 +64,7 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  // ✅ Drawer Content
+  // Drawer items
   const drawerContent = (
     <Box sx={{ textAlign: "center", mt: 2 }}>
       <List>
@@ -68,14 +78,15 @@ const Navbar = () => {
           <ListItemText primary="Dashboard" />
         </ListItemButton>
 
-        {/* Ads Management */}
+        {/* --------------------- Ads --------------------- */}
         <ListItemButton onClick={() => setOpenAds(!openAds)}>
           <Loyalty sx={{ mr: 2, color: "#FAA533" }} />
           <ListItemText primary="Ads Management" />
           {openAds ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
-        <Collapse in={openAds} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
+
+        <Collapse in={openAds} unmountOnExit>
+          <List disablePadding>
             <ListItemButton
               sx={{ pl: 8 }}
               component={Link}
@@ -83,7 +94,7 @@ const Navbar = () => {
               onClick={() => isMobile && handleDrawerToggle()}
             >
               <AddCircleOutline sx={{ mr: 2, color: "#FAA533" }} />
-              <ListItemText primary="Add Ads" />
+              <ListItemText primary="Add Ad" />
             </ListItemButton>
 
             <ListItemButton
@@ -98,14 +109,15 @@ const Navbar = () => {
           </List>
         </Collapse>
 
-        {/* Taglines Management */}
+        {/* --------------------- Taglines --------------------- */}
         <ListItemButton onClick={() => setOpenTaglines(!openTaglines)}>
           <FormatQuote sx={{ mr: 2, color: "#FAA533" }} />
           <ListItemText primary="Taglines Management" />
           {openTaglines ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
-        <Collapse in={openTaglines} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
+
+        <Collapse in={openTaglines} unmountOnExit>
+          <List disablePadding>
             <ListItemButton
               sx={{ pl: 8 }}
               component={Link}
@@ -118,14 +130,15 @@ const Navbar = () => {
           </List>
         </Collapse>
 
-        {/* Testimonials Management */}
+        {/* --------------------- Testimonials --------------------- */}
         <ListItemButton onClick={() => setOpenTestimonials(!openTestimonials)}>
           <FormatQuote sx={{ mr: 2, color: "#FAA533" }} />
           <ListItemText primary="Testimonials" />
           {openTestimonials ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
-        <Collapse in={openTestimonials} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
+
+        <Collapse in={openTestimonials} unmountOnExit>
+          <List disablePadding>
             <ListItemButton
               sx={{ pl: 8 }}
               component={Link}
@@ -135,6 +148,7 @@ const Navbar = () => {
               <AddCircleOutline sx={{ mr: 2, color: "#FAA533" }} />
               <ListItemText primary="Add Testimonial" />
             </ListItemButton>
+
             <ListItemButton
               sx={{ pl: 8 }}
               component={Link}
@@ -147,6 +161,58 @@ const Navbar = () => {
           </List>
         </Collapse>
 
+        {/* --------------------- Blogs --------------------- */}
+        <ListItemButton onClick={() => setOpenBlogs(!openBlogs)}>
+          <Article sx={{ mr: 2, color: "#FAA533" }} />
+          <ListItemText primary="Blogs" />
+          {openBlogs ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+
+        <Collapse in={openBlogs} unmountOnExit>
+          <List disablePadding>
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/add-blogs"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <AddCircleOutline sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Add Blog" />
+            </ListItemButton>
+
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/all-blogs"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <ViewList sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Manage Blogs" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {/* --------------------- Reached Users --------------------- */}
+        <ListItemButton onClick={() => setOpenReachedUsers(!openReachedUsers)}>
+          <Group sx={{ mr: 2, color: "#FAA533" }} />
+          <ListItemText primary="Reached Users" />
+          {openReachedUsers ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+
+        <Collapse in={openReachedUsers} unmountOnExit>
+          <List disablePadding>
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/viewers"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <ViewList sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Viewers List" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
         <Divider sx={{ my: 2 }} />
       </List>
     </Box>
@@ -155,6 +221,8 @@ const Navbar = () => {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
+
+      {/* AppBar */}
       <AppBar
         position="fixed"
         sx={{
@@ -169,48 +237,39 @@ const Navbar = () => {
             </IconButton>
           )}
 
-          <Typography
-            variant={isMobile ? "h6" : "h5"}
-            noWrap
-            sx={{ fontFamily: "Poppins" }}
-          >
+          <Typography variant="h5" sx={{ fontFamily: "Poppins" }}>
             Admin Panel
           </Typography>
 
-          {/* Avatar + Logout */}
-          <Box>
-            <IconButton onClick={handleMenuOpen}>
-              <Avatar
-                sx={{
-                  bgcolor: "white",
-                  color: "#EF7722",
-                  fontWeight: "bold",
-                  width: 35,
-                  height: 35,
-                  fontSize: 14,
-                }}
-              >
-                AD
-              </Avatar>
-            </IconButton>
-
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
+          {/* Profile + Logout */}
+          <IconButton onClick={handleMenuOpen}>
+            <Avatar
+              sx={{
+                bgcolor: "white",
+                color: "#EF7722",
+                fontWeight: "bold",
+                width: 35,
+                height: 35,
+              }}
             >
-              <MenuItem onClick={handleLogout}>
-                <Logout sx={{ mr: 1, color: "red" }} fontSize="small" />
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
+              AD
+            </Avatar>
+          </IconButton>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleLogout}>
+              <Logout sx={{ mr: 1, color: "red" }} fontSize="small" />
+              Logout
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 
-      {/* Drawer */}
+      {/* Side Drawer */}
       {isMobile ? (
         <Drawer
           variant="temporary"
@@ -239,8 +298,8 @@ const Navbar = () => {
             flexShrink: 0,
             [`& .MuiDrawer-paper`]: {
               width: drawerWidth,
-              top: "64px",
               bgcolor: "#FFF8F0",
+              top: "64px",
               height: "100vh",
             },
           }}

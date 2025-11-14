@@ -15,6 +15,9 @@ import Login from "./pages/Login";
 import Tagline from "./pages/Tagline";
 import Testimonials from "./pages/Testimonials";
 import TestimonialList from "./pages/TestimonialList";
+import AddBlogs from "./pages/AddBlogs";
+import BlogList from "./pages/BlogList";
+import Viewers from "./pages/Viewers";
 
 // ✅ ProtectedRoute component
 const ProtectedRoute = ({ children }) => {
@@ -63,6 +66,9 @@ const App = () => {
                       path="/testimonials"
                       element={<TestimonialList />}
                     ></Route>
+                    <Route path="/add-blogs" element={<AddBlogs />}></Route>
+                    <Route path="/all-blogs" element={<BlogList />}></Route>
+                    <Route path="/viewers" element={<Viewers />}></Route>
                   </Routes>
                 </Box>
               </Box>
