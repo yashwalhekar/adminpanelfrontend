@@ -6,13 +6,28 @@ const AddBlogs = () => {
   const [title, setTitle] = useState("");
   const [creator, setCreator] = useState("");
   const [content, setContent] = useState("");
+
   const [fileName, setFileName] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [timeChips, setTimeChips] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
+
+  // Handle image upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   // Handle .docx upload
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -34,24 +49,38 @@ const AddBlogs = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // Submit form
+  // Submit form with image + data
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       setLoading(true);
-      const res = await API.post("/blogs", {
-        title,
-        creator,
-        content,
+
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("creator", creator);
+      formData.append("content", content);
+      formData.append("timeChips", timeChips);
+
+      if (image) formData.append("image", image);
+
+      const res = await API.post("/blogs", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
+
       setSnackbar({
         open: true,
-        message: res.data.message || "Ad created successfully!",
+        message: res.data.message || "Blog created successfully!",
         severity: "success",
       });
+
       setTitle("");
-      setContent("");
       setCreator("");
+      setContent("");
+      setImage("");
+      setImagePreview("");
+      setFileName("");
+      setTimeChips("");
     } catch (error) {
       setSnackbar({
         open: true,
@@ -66,15 +95,15 @@ const AddBlogs = () => {
 
   return (
     <>
-      {/* Page Header (Outside Form) */}
+      {/* Page Header */}
       <div className="w-full mb-6 mt-4">
         <h2 className="text-2xl md:text-3xl font-bold text-start text-orange-600 mb-2 font-poppins">
           Create a Blog Post
         </h2>
         <div className="w-full border-b-2 border-[#FAA533]"></div>
       </div>
+
       <div className="min-h-screen flex flex-col items-center p-4">
-        {/* Blog Form Container */}
         <div className="bg-white shadow-lg rounded-2xl w-full max-w-3xl p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Title */}
@@ -84,10 +113,9 @@ const AddBlogs = () => {
               </label>
               <input
                 type="text"
-                placeholder="Enter blog title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-orange-400"
                 required
               />
             </div>
@@ -99,11 +127,45 @@ const AddBlogs = () => {
               </label>
               <input
                 type="text"
-                placeholder="Enter creator name"
                 value={creator}
                 onChange={(e) => setCreator(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-orange-400"
                 required
+              />
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Upload Blog Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="w-full border border-dashed border-gray-400 p-3 rounded-xl"
+              />
+
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mt-3 w-full h-56 object-cover rounded-xl shadow-md"
+                />
+              )}
+            </div>
+
+            {/* Time Chips */}
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Reading Time (e.g., 5 min read)
+              </label>
+              <input
+                type="text"
+                placeholder="Enter reading time"
+                value={timeChips}
+                onChange={(e) => setTimeChips(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
 
@@ -116,45 +178,41 @@ const AddBlogs = () => {
                 type="file"
                 accept=".docx"
                 onChange={handleFileUpload}
-                className="w-full border border-dashed border-gray-400 p-3 rounded-xl text-sm text-gray-500 cursor-pointer hover:bg-gray-50"
+                className="w-full border border-dashed border-gray-400 p-3 rounded-xl"
               />
               {fileName && (
                 <p className="text-sm text-green-600 mt-1">File: {fileName}</p>
               )}
             </div>
 
-            {/* Textarea */}
+            {/* Content */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">
                 Blog Content
               </label>
               <textarea
                 rows="10"
-                placeholder="Write or edit your blog content here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+                className="w-full border border-gray-300 rounded-xl p-3 resize-none focus:ring-2 focus:ring-orange-400"
               ></textarea>
             </div>
 
             {/* Submit Button */}
-            <div className="text-center">
-              <button
-                type="submit"
-                className="w-full md:w-auto bg-orange-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-600 transition-all duration-200"
-              >
-                Publish Blog
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600"
+              disabled={loading}
+            >
+              {loading ? "Publishing..." : "Publish Blog"}
+            </button>
           </form>
+
+          {/* Snackbar */}
           {snackbar.open && (
             <div
-              className={`fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium transition-all duration-300 ${
-                snackbar.severity === "success"
-                  ? "bg-green-500"
-                  : snackbar.severity === "error"
-                  ? "bg-red-500"
-                  : "bg-yellow-500"
+              className={`fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium ${
+                snackbar.severity === "success" ? "bg-green-500" : "bg-red-500"
               }`}
             >
               {snackbar.message}

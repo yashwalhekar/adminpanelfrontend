@@ -51,6 +51,7 @@ const Navbar = () => {
   const [openTestimonials, setOpenTestimonials] = useState(false);
   const [openBlogs, setOpenBlogs] = useState(false);
   const [openReachedUsers, setOpenReachedUsers] = useState(false);
+  const [openRequests, setOpenRequests] = useState(false);
 
   const navigate = useNavigate();
 
@@ -209,6 +210,28 @@ const Navbar = () => {
             >
               <ViewList sx={{ mr: 2, color: "#FAA533" }} />
               <ListItemText primary="Viewers List" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {/*-------------------- Module Requests-------------------- */}
+
+        <ListItemButton onClick={() => setOpenRequests(!openRequests)}>
+          <Group sx={{ mr: 2, color: "#FAA533" }} />
+          <ListItemText primary="Freebies" />
+          {openRequests ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+
+        <Collapse in={openRequests} unmountOnExit>
+          <List disablePadding>
+            <ListItemButton
+              sx={{ pl: 8 }}
+              component={Link}
+              to="/moduleRequests"
+              onClick={() => isMobile && handleDrawerToggle()}
+            >
+              <ViewList sx={{ mr: 2, color: "#FAA533" }} />
+              <ListItemText primary="Freebies" />
             </ListItemButton>
           </List>
         </Collapse>

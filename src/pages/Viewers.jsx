@@ -135,7 +135,7 @@ const Viewers = () => {
                           label="Full Name"
                           size="small"
                           sx={{ mb: 2 }}
-                          value={editData.fullname}
+                          value={editData.fullName}
                           onChange={(e) =>
                             setEditData({
                               ...editData,
@@ -336,12 +336,12 @@ const Viewers = () => {
                             onChange={(e) =>
                               setEditData({
                                 ...editData,
-                                fullname: e.target.value,
+                                fullName: e.target.value,
                               })
                             }
                           />
                         ) : (
-                          row.fullname
+                          row.fullName
                         )}
                       </TableCell>
 

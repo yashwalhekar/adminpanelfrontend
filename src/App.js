@@ -18,6 +18,7 @@ import TestimonialList from "./pages/TestimonialList";
 import AddBlogs from "./pages/AddBlogs";
 import BlogList from "./pages/BlogList";
 import Viewers from "./pages/Viewers";
+import FreebiesPdf from "./pages/FreebiesPdf";
 
 // ✅ ProtectedRoute component
 const ProtectedRoute = ({ children }) => {
@@ -69,6 +70,10 @@ const App = () => {
                     <Route path="/add-blogs" element={<AddBlogs />}></Route>
                     <Route path="/all-blogs" element={<BlogList />}></Route>
                     <Route path="/viewers" element={<Viewers />}></Route>
+                    <Route
+                      path="/modulerequests"
+                      element={<FreebiesPdf />}
+                    ></Route>
                   </Routes>
                 </Box>
               </Box>

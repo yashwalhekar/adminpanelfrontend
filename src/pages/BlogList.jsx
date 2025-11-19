@@ -55,7 +55,21 @@ const BlogList = () => {
     try {
       setLoading(true);
       const res = await API.get("/blogs");
-      setBlogs(res.data);
+
+      const list = res.data.blogs || res.data || [];
+
+      const normalized = list.map((b) => ({
+        _id: b._id,
+        title: b.title || "",
+        creator: b.creator || "",
+        content: b.content || "",
+        imgUrl: b.imgUrl || "",
+        status: b.status ?? false,
+        createdAt: b.createdAt || "",
+        updatedAt: b.updatedAt || "",
+      }));
+
+      setBlogs(normalized);
     } catch (error) {
       console.error("Failed to load blogs", error);
       setSnackbar({
@@ -160,7 +174,7 @@ const BlogList = () => {
 
   const handlePrev = () => setPage((prev) => Math.max(prev - 1, 1));
   const handleNext = () => setPage((prev) => Math.min(prev + 1, totalPages));
-
+  console.log(blogs);
   return (
     <Box p={3}>
       <Typography
@@ -188,20 +202,34 @@ const BlogList = () => {
                 elevation={3}
                 sx={{ p: 2, borderRadius: 2, borderLeft: "4px solid #EF7722" }}
               >
+                <img
+                  src={b.imgUrl}
+                  alt="blog"
+                  style={{
+                    width: "100%",
+                    height: 160,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    marginBottom: 8,
+                  }}
+                />
+
                 <Typography variant="h6" color="#EF7722">
                   {b.title}
                 </Typography>
+
                 <Typography variant="body2" color="text.secondary">
                   Creator: {b.creator}
                 </Typography>
+
                 <Typography variant="body2" color="text.secondary">
-                  Created:{" "}
-                  {new Date(b.createdAt).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
+                  Created: {new Date(b.createdAt).toLocaleDateString("en-GB")}
                 </Typography>
+
+                {/* <Typography variant="body2" color="text.secondary">
+                  Updated: {new Date(b.updatedAt).toLocaleDateString("en-GB")}
+                </Typography> */}
+
                 <Typography variant="body2" sx={{ my: 1 }}>
                   {b.content.slice(0, 100)}...
                 </Typography>
@@ -271,6 +299,9 @@ const BlogList = () => {
               <TableHead sx={{ backgroundColor: "#EF7722" }}>
                 <TableRow>
                   <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Image
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                     Title
                   </TableCell>
                   <TableCell sx={{ color: "white", fontWeight: "bold" }}>
@@ -280,20 +311,26 @@ const BlogList = () => {
                     Content
                   </TableCell>
                   <TableCell
-                    align="center"
                     sx={{ color: "white", fontWeight: "bold" }}
+                    align="center"
                   >
-                    Created Date
+                    Created At
                   </TableCell>
-                  <TableCell
-                    align="center"
+                  {/* <TableCell
                     sx={{ color: "white", fontWeight: "bold" }}
+                    align="center"
+                  >
+                    Updated At
+                  </TableCell> */}
+                  <TableCell
+                    sx={{ color: "white", fontWeight: "bold" }}
+                    align="center"
                   >
                     Status
                   </TableCell>
                   <TableCell
-                    align="center"
                     sx={{ color: "white", fontWeight: "bold" }}
+                    align="center"
                   >
                     Actions
                   </TableCell>
@@ -309,13 +346,31 @@ const BlogList = () => {
                 ) : (
                   currentBlogs.map((b) => (
                     <TableRow key={b._id} hover>
+                      {/* Image */}
+                      <TableCell>
+                        <img
+                          src={b.imgUrl}
+                          alt="blog"
+                          style={{
+                            width: 60,
+                            height: 40,
+                            objectFit: "cover",
+                            borderRadius: 6,
+                          }}
+                        />
+                      </TableCell>
+
                       <TableCell>{b.title}</TableCell>
                       <TableCell>{b.creator}</TableCell>
+
+                      {/* Content */}
                       <TableCell>
                         {b.content.length > 80
                           ? b.content.slice(0, 80) + "..."
                           : b.content}
                       </TableCell>
+
+                      {/* Created Timechip */}
                       <TableCell align="center">
                         {new Date(b.createdAt).toLocaleDateString("en-GB", {
                           day: "2-digit",
@@ -323,6 +378,16 @@ const BlogList = () => {
                           year: "numeric",
                         })}
                       </TableCell>
+
+                      {/* Updated Timechip */}
+                      {/* <TableCell align="center">
+                        {new Date(b.updatedAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </TableCell> */}
+
                       <TableCell align="center">
                         <Switch
                           checked={b.status}
@@ -330,6 +395,7 @@ const BlogList = () => {
                           color="warning"
                         />
                       </TableCell>
+
                       <TableCell align="center">
                         <IconButton
                           color="primary"
