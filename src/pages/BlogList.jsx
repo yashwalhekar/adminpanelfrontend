@@ -66,7 +66,7 @@ const BlogList = () => {
         imgUrl: b.imgUrl || "",
         status: b.status ?? false,
         createdAt: b.createdAt || "",
-        slugs: b.slugs || "",
+        slugs: b.slug || "",
         timeChips: b.timeChips || "",
       }));
 
@@ -153,7 +153,7 @@ const BlogList = () => {
         title: selectedBlog.title,
         creator: selectedBlog.creator,
         content: selectedBlog.content,
-        slugs: selectedBlog.slugs,
+        slug: selectedBlog.slugs,
       });
 
       fetchBlogs();
