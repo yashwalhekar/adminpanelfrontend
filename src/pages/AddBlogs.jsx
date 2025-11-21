@@ -11,6 +11,7 @@ const AddBlogs = () => {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [timeChips, setTimeChips] = useState("");
+  const [slugs, setSlugs] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -61,12 +62,16 @@ const AddBlogs = () => {
       formData.append("creator", creator);
       formData.append("content", content);
       formData.append("timeChips", timeChips);
+      formData.append("slugs", slugs);
 
       if (image) formData.append("image", image);
+      console.log("formdata", formData);
 
       const res = await API.post("/blogs", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      console.log(res);
 
       setSnackbar({
         open: true,
@@ -81,6 +86,7 @@ const AddBlogs = () => {
       setImagePreview("");
       setFileName("");
       setTimeChips("");
+      setSlugs("");
     } catch (error) {
       setSnackbar({
         open: true,
@@ -153,6 +159,20 @@ const AddBlogs = () => {
                   className="mt-3 w-full h-56 object-cover rounded-xl shadow-md"
                 />
               )}
+            </div>
+
+            {/* slugs */}
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Slug
+              </label>
+              <input
+                type="text"
+                placeholder="Do not add any space between words"
+                value={slugs}
+                onChange={(e) => setSlugs(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
             </div>
 
             {/* Time Chips */}

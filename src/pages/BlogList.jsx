@@ -66,7 +66,8 @@ const BlogList = () => {
         imgUrl: b.imgUrl || "",
         status: b.status ?? false,
         createdAt: b.createdAt || "",
-        updatedAt: b.updatedAt || "",
+        slugs: b.slugs || "",
+        timeChips: b.timeChips || "",
       }));
 
       setBlogs(normalized);
@@ -133,7 +134,12 @@ const BlogList = () => {
 
   // ✅ Update blog
   const handleUpdate = async () => {
-    if (!selectedBlog.title || !selectedBlog.creator || !selectedBlog.content) {
+    if (
+      !selectedBlog.title ||
+      !selectedBlog.creator ||
+      !selectedBlog.content ||
+      !selectedBlog.slugs
+    ) {
       setSnackbar({
         open: true,
         message: "Please fill all fields before saving",
@@ -147,6 +153,7 @@ const BlogList = () => {
         title: selectedBlog.title,
         creator: selectedBlog.creator,
         content: selectedBlog.content,
+        slugs: selectedBlog.slugs,
       });
 
       fetchBlogs();
@@ -213,7 +220,9 @@ const BlogList = () => {
                     marginBottom: 8,
                   }}
                 />
-
+                <Typography variant="h6" color="#EF7722">
+                  {b.slugs}
+                </Typography>
                 <Typography variant="h6" color="#EF7722">
                   {b.title}
                 </Typography>
@@ -302,6 +311,9 @@ const BlogList = () => {
                     Image
                   </TableCell>
                   <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Slugs
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                     Title
                   </TableCell>
                   <TableCell sx={{ color: "white", fontWeight: "bold" }}>
@@ -360,6 +372,7 @@ const BlogList = () => {
                         />
                       </TableCell>
 
+                      <TableCell>{b.slugs}</TableCell>
                       <TableCell>{b.title}</TableCell>
                       <TableCell>{b.creator}</TableCell>
 
@@ -378,15 +391,6 @@ const BlogList = () => {
                           year: "numeric",
                         })}
                       </TableCell>
-
-                      {/* Updated Timechip */}
-                      {/* <TableCell align="center">
-                        {new Date(b.updatedAt).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </TableCell> */}
 
                       <TableCell align="center">
                         <Switch
@@ -455,6 +459,15 @@ const BlogList = () => {
           Edit Blog
         </DialogTitle>
         <DialogContent>
+          <TextField
+            margin="dense"
+            label="Slugs"
+            fullWidth
+            value={selectedBlog?.slugs || ""}
+            onChange={(e) =>
+              setSelectedBlog({ ...selectedBlog, slugs: e.target.value })
+            }
+          />
           <TextField
             margin="dense"
             label="Title"
