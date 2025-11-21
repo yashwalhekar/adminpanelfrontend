@@ -62,7 +62,7 @@ const AddBlogs = () => {
       formData.append("creator", creator);
       formData.append("content", content);
       formData.append("timeChips", timeChips);
-      formData.append("slugs", slugs);
+      formData.append("slug", slugs);
 
       if (image) formData.append("image", image);
       console.log("formdata", formData);
