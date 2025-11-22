@@ -11,24 +11,39 @@ import {
   Box,
   Typography,
   Button,
+  IconButton,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useState, useEffect } from "react";
 import API from "../service/api";
+import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 
 const FreebiesPdf = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [data, setData] = useState("");
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sentEmails, setSentEmails] = useState({});
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
+
+  const totalPages = Math.ceil((data?.data?.length || 0) / recordsPerPage);
+
+  const currentRecords = data?.data?.slice(
+    (currentPage - 1) * recordsPerPage,
+    currentPage * recordsPerPage
+  );
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
 
   // Fetch Freebies
   const fetchRequest = async () => {
@@ -38,11 +53,6 @@ const FreebiesPdf = () => {
       setData(res.data);
     } catch (error) {
       console.error("Failed to load data", error);
-      setSnackbar({
-        open: true,
-        message: "Failed to load Requests",
-        severity: "error",
-      });
     } finally {
       setLoading(false);
     }
@@ -101,10 +111,10 @@ Your Company`
         Freebies Requests
       </Typography>
 
-      {/* MOBILE VIEW — Modern Glass Cards */}
+      {/* -------------- MOBILE VIEW WITH CARDS & ARROWS ------------ */}
       {isMobile && (
         <Box display="flex" flexDirection="column" gap={2}>
-          {data?.data?.map((item) => (
+          {currentRecords?.map((item) => (
             <Paper
               key={item.id}
               sx={{
@@ -141,10 +151,37 @@ Your Company`
               </Button>
             </Paper>
           ))}
+
+          {/* Pagination arrows */}
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            gap={2}
+            mt={2}
+          >
+            <IconButton
+              variant="outlined"
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+            >
+              <ArrowBackIos />
+            </IconButton>
+            <Typography fontWeight={600}>
+              {currentPage} / {totalPages}
+            </Typography>
+            <IconButton
+              variant="outlined"
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+            >
+              <ArrowForwardIos />
+            </IconButton>
+          </Box>
         </Box>
       )}
 
-      {/* DESKTOP + TABLET VIEW — Premium Table */}
+      {/* -------- DESKTOP VIEW WITH TABLE PAGINATION --------- */}
       {!isMobile && (
         <TableContainer
           component={Paper}
@@ -170,7 +207,7 @@ Your Company`
             </TableHead>
 
             <TableBody>
-              {data?.data?.map((item) => (
+              {currentRecords?.map((item) => (
                 <TableRow
                   key={item.id}
                   sx={{
@@ -207,6 +244,33 @@ Your Company`
               ))}
             </TableBody>
           </Table>
+
+          {/* Desktop pagination */}
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            gap={2}
+            p={2}
+          >
+            <Button
+              variant="outlined"
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </Button>
+            <Typography fontWeight={600}>
+              {currentPage} / {totalPages}
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </Box>
         </TableContainer>
       )}
     </Box>

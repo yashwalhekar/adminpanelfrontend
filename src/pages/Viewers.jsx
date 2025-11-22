@@ -18,6 +18,7 @@ import {
   useMediaQuery,
   useTheme,
   Divider,
+  Button,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -26,6 +27,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 
 import API from "../service/api";
+import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 
 const Viewers = () => {
   const [rows, setRows] = useState([]);
@@ -33,6 +35,25 @@ const Viewers = () => {
 
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 6;
+  const totalPages = Math.ceil(rows.length / recordsPerPage);
+
+  const currentRecords = rows.slice(
+    (currentPage - 1) * recordsPerPage,
+    currentPage * recordsPerPage
+  );
+
+  // Handle pagination
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -54,7 +75,7 @@ const Viewers = () => {
     fetchData();
   }, []);
 
-  // ---------------- DELETE ----------------
+  // DELETE
   const handleDelete = async (id) => {
     try {
       await API.delete(`/users/${id}`);
@@ -64,19 +85,16 @@ const Viewers = () => {
     }
   };
 
-  // --------------- EDIT MODE ----------------
   const handleEdit = (row) => {
     setEditId(row._id);
     setEditData({ ...row });
   };
 
-  // --------------- CANCEL EDIT ----------------
   const handleCancel = () => {
     setEditId(null);
     setEditData({});
   };
 
-  // -------------- SAVE EDITED DATA ----------------
   const handleSave = async () => {
     try {
       await API.put(`/users/${editId}`, editData);
@@ -109,10 +127,9 @@ const Viewers = () => {
         </Box>
       ) : (
         <>
-          {/* ---------------- MOBILE & TABLET (MODERN EDITABLE CARD VIEW) ---------------- */}
           {(isMobile || isTablet) && (
             <Stack spacing={2}>
-              {rows.map((row) => {
+              {currentRecords.map((row) => {
                 const isEditing = editId === row._id;
 
                 return (
@@ -128,20 +145,20 @@ const Viewers = () => {
                     }}
                   >
                     <CardContent>
-                      {/* ---------------- NAME ---------------- */}
+                      {/* Name Field */}
                       {isEditing ? (
                         <TextField
                           fullWidth
                           label="Full Name"
                           size="small"
-                          sx={{ mb: 2 }}
-                          value={editData.fullName}
+                          value={editData.fullname}
                           onChange={(e) =>
                             setEditData({
                               ...editData,
                               fullname: e.target.value,
                             })
                           }
+                          sx={{ mb: 2 }}
                         />
                       ) : (
                         <Typography
@@ -154,7 +171,7 @@ const Viewers = () => {
                         </Typography>
                       )}
 
-                      {/* ---------------- COUNTRY ---------------- */}
+                      {/* Country */}
                       {isEditing ? (
                         <TextField
                           fullWidth
@@ -170,12 +187,12 @@ const Viewers = () => {
                           }
                         />
                       ) : (
-                        <Typography sx={{ mb: 0.5 }}>
+                        <Typography>
                           <strong>Country:</strong> {row.country}
                         </Typography>
                       )}
 
-                      {/* ---------------- CITY ---------------- */}
+                      {/* City */}
                       {isEditing ? (
                         <TextField
                           fullWidth
@@ -188,12 +205,12 @@ const Viewers = () => {
                           }
                         />
                       ) : (
-                        <Typography sx={{ mb: 0.5 }}>
+                        <Typography>
                           <strong>City:</strong> {row.city}
                         </Typography>
                       )}
 
-                      {/* ---------------- EMAIL ---------------- */}
+                      {/* Email */}
                       {isEditing ? (
                         <TextField
                           fullWidth
@@ -206,12 +223,12 @@ const Viewers = () => {
                           }
                         />
                       ) : (
-                        <Typography sx={{ mb: 0.5 }}>
+                        <Typography>
                           <strong>Email:</strong> {row.email}
                         </Typography>
                       )}
 
-                      {/* ---------------- PHONE ---------------- */}
+                      {/* Phone */}
                       {isEditing ? (
                         <TextField
                           fullWidth
@@ -224,14 +241,13 @@ const Viewers = () => {
                           }
                         />
                       ) : (
-                        <Typography sx={{ mb: 1 }}>
+                        <Typography>
                           <strong>Phone:</strong> {row.phone}
                         </Typography>
                       )}
 
                       <Divider sx={{ my: 2 }} />
 
-                      {/* ---------------- ACTION BUTTONS ---------------- */}
                       <Stack
                         direction="row"
                         spacing={2}
@@ -239,49 +255,19 @@ const Viewers = () => {
                       >
                         {isEditing ? (
                           <>
-                            {/* SAVE */}
-                            <IconButton
-                              onClick={handleSave}
-                              sx={{
-                                background: "#e7f9ef",
-                                "&:hover": { background: "#d3f3e0" },
-                              }}
-                            >
+                            <IconButton onClick={handleSave}>
                               <SaveIcon sx={{ color: "green" }} />
                             </IconButton>
-
-                            {/* CANCEL */}
-                            <IconButton
-                              onClick={handleCancel}
-                              sx={{
-                                background: "#fdeaea",
-                                "&:hover": { background: "#f8dcdc" },
-                              }}
-                            >
+                            <IconButton onClick={handleCancel}>
                               <CloseIcon sx={{ color: "red" }} />
                             </IconButton>
                           </>
                         ) : (
                           <>
-                            {/* EDIT */}
-                            <IconButton
-                              onClick={() => handleEdit(row)}
-                              sx={{
-                                background: "#e7f9ef",
-                                "&:hover": { background: "#d3f3e0" },
-                              }}
-                            >
+                            <IconButton onClick={() => handleEdit(row)}>
                               <EditIcon sx={{ color: "green" }} />
                             </IconButton>
-
-                            {/* DELETE */}
-                            <IconButton
-                              onClick={() => handleDelete(row._id)}
-                              sx={{
-                                background: "#fdeaea",
-                                "&:hover": { background: "#f8dcdc" },
-                              }}
-                            >
+                            <IconButton onClick={() => handleDelete(row._id)}>
                               <DeleteIcon sx={{ color: "red" }} />
                             </IconButton>
                           </>
@@ -291,156 +277,103 @@ const Viewers = () => {
                   </Card>
                 );
               })}
+
+              {/* Pagination Mobile */}
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                gap={2}
+                mt={1}
+              >
+                <IconButton
+                  variant="outlined"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                >
+                  <ArrowBackIos />
+                </IconButton>
+                <Typography fontWeight="600">
+                  {currentPage} / {totalPages}
+                </Typography>
+                <IconButton
+                  variant="outlined"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  <ArrowForwardIos />
+                </IconButton>
+              </Box>
             </Stack>
           )}
 
-          {/* ---------------- DESKTOP TABLE VIEW ---------------- */}
+          {/* Desktop Table */}
           {!isMobile && !isTablet && (
-            <TableContainer component={Paper} elevation={3}>
-              <Table>
-                <TableHead sx={{ background: "#EF7722" }}>
-                  <TableRow>
-                    <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                      Full Name
-                    </TableCell>
-                    <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                      Country
-                    </TableCell>
-                    <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                      City
-                    </TableCell>
-                    <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                      Email
-                    </TableCell>
-                    <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                      Phone
-                    </TableCell>
-                    <TableCell
-                      sx={{ color: "white", fontWeight: "bold" }}
-                      align="center"
-                    >
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row._id}>
-                      {/* ------------ FULL NAME ------------ */}
-                      <TableCell>
-                        {editId === row._id ? (
-                          <TextField
-                            size="small"
-                            value={editData.fullname}
-                            onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                fullName: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          row.fullName
-                        )}
-                      </TableCell>
-
-                      {/* ------------ COUNTRY ------------ */}
-                      <TableCell>
-                        {editId === row._id ? (
-                          <TextField
-                            size="small"
-                            value={editData.country}
-                            onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                country: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          row.country
-                        )}
-                      </TableCell>
-
-                      {/* ------------ CITY ------------ */}
-                      <TableCell>
-                        {editId === row._id ? (
-                          <TextField
-                            size="small"
-                            value={editData.city}
-                            onChange={(e) =>
-                              setEditData({ ...editData, city: e.target.value })
-                            }
-                          />
-                        ) : (
-                          row.city
-                        )}
-                      </TableCell>
-
-                      {/* ------------ EMAIL ------------ */}
-                      <TableCell>
-                        {editId === row._id ? (
-                          <TextField
-                            size="small"
-                            value={editData.email}
-                            onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                email: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          row.email
-                        )}
-                      </TableCell>
-
-                      {/* ------------ PHONE ------------ */}
-                      <TableCell>
-                        {editId === row._id ? (
-                          <TextField
-                            size="small"
-                            value={editData.phone}
-                            onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                phone: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          row.phone
-                        )}
-                      </TableCell>
-
-                      {/* ------------ ACTIONS ------------ */}
-                      <TableCell align="center">
-                        {editId === row._id ? (
-                          <>
-                            <IconButton onClick={handleSave}>
-                              <SaveIcon color="success" />
-                            </IconButton>
-                            <IconButton onClick={handleCancel}>
-                              <CloseIcon color="error" />
-                            </IconButton>
-                          </>
-                        ) : (
-                          <>
-                            <IconButton onClick={() => handleEdit(row)}>
-                              <EditIcon color="success" />
-                            </IconButton>
-                            <IconButton onClick={() => handleDelete(row._id)}>
-                              <DeleteIcon color="error" />
-                            </IconButton>
-                          </>
-                        )}
+            <>
+              <TableContainer component={Paper} elevation={3}>
+                <Table>
+                  <TableHead sx={{ background: "#EF7722" }}>
+                    <TableRow>
+                      <TableCell sx={{ color: "white" }}>Full Name</TableCell>
+                      <TableCell sx={{ color: "white" }}>Country</TableCell>
+                      <TableCell sx={{ color: "white" }}>City</TableCell>
+                      <TableCell sx={{ color: "white" }}>Email</TableCell>
+                      <TableCell sx={{ color: "white" }}>Phone</TableCell>
+                      <TableCell sx={{ color: "white" }} align="center">
+                        Actions
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+
+                  <TableBody>
+                    {currentRecords.map((row) => (
+                      <TableRow key={row._id}>
+                        <TableCell>{row.fullName}</TableCell>
+                        <TableCell>{row.country}</TableCell>
+                        <TableCell>{row.city}</TableCell>
+                        <TableCell>{row.email}</TableCell>
+                        <TableCell>{row.phone}</TableCell>
+                        <TableCell align="center">
+                          <IconButton onClick={() => handleEdit(row)}>
+                            <EditIcon color="success" />
+                          </IconButton>
+                          <IconButton onClick={() => handleDelete(row._id)}>
+                            <DeleteIcon color="error" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Pagination Desktop */}
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                gap={2}
+                mt={2}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </Button>
+                <Typography fontWeight="600">
+                  {currentPage} / {totalPages}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </Box>
+            </>
           )}
         </>
       )}

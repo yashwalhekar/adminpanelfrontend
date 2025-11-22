@@ -23,14 +23,14 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
+  Switch,
+  Button,
 } from "@mui/material";
 import {
   Edit,
   Delete,
   Save,
   Close,
-  ArrowForward,
-  ArrowBack,
   ArrowBackIos,
   ArrowForwardIos,
 } from "@mui/icons-material";
@@ -46,12 +46,13 @@ const TestimonialList = () => {
     message: "",
     severity: "",
   });
-  const ITEMS_PER_PAGE = 5;
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const ITEMS = isMobile ? 2 : ITEMS_PER_PAGE;
+
   const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = isMobile ? 2 : 10;
 
   // ✅ Fetch all testimonials
   const fetchTestimonials = async () => {
@@ -123,10 +124,29 @@ const TestimonialList = () => {
       setSnackbar({ open: true, message: "Delete failed", severity: "error" });
     }
   };
-  const totalPages = Math.ceil(testimonials.length / ITEMS);
+
+  const handleToggleStatus = async (id) => {
+    try {
+      await API.put(`/testimonials/${id}/status`);
+      fetchTestimonials();
+      setSnackbar({
+        open: true,
+        message: "Status Updated successfully!!",
+        severity: "success",
+      });
+    } catch (error) {
+      console.log("Failed to update status", error.message);
+      setSnackbar({
+        open: true,
+        message: "Failed to update status",
+        severity: "error",
+      });
+    }
+  };
+  const totalPages = Math.ceil(testimonials.length / ITEMS_PER_PAGE);
   const currentTestimonial = testimonials.slice(
-    (page - 1) * ITEMS,
-    page * ITEMS
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
   );
 
   const handlePrev = () => setPage((prev) => Math.max(prev - 1, 1));
@@ -158,31 +178,47 @@ const TestimonialList = () => {
       {/* ✅ TABLE for Desktop and Tablet */}
       {!isMobile ? (
         <>
-          <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+          <TableContainer
+            component={Paper}
+            sx={{ borderRadius: 2, overflow: "hidden" }}
+          >
             <Table size={isTablet ? "small" : "medium"}>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#FAA533" }}>
-                  {["Full Name", "City", "Country", "Feedback", "Actions"].map(
-                    (header) => (
-                      <TableCell
-                        key={header}
-                        sx={{ color: "white", fontWeight: 600 }}
-                      >
-                        {header}
-                      </TableCell>
-                    )
-                  )}
+                <TableRow sx={{ backgroundColor: "#EF7722" }}>
+                  {[
+                    "Full Name",
+                    "City",
+                    "Country",
+                    "Feedback",
+                    "Status",
+                    "Actions",
+                  ].map((header) => (
+                    <TableCell
+                      key={header}
+                      align="center"
+                      sx={{ color: "white", fontWeight: 600, fontSize: "15px" }}
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
 
               <TableBody>
                 {currentTestimonial.map((item) => (
-                  <TableRow key={item._id} hover>
+                  <TableRow
+                    key={item._id}
+                    hover
+                    sx={{
+                      transition: "0.3s",
+                      "&:hover": { backgroundColor: "#FFF4EA" },
+                    }}
+                  >
                     {editId === item._id ? (
                       <>
                         {["fullName", "city", "country", "feedbackText"].map(
                           (field) => (
-                            <TableCell key={field}>
+                            <TableCell key={field} align="center">
                               <TextField
                                 name={field}
                                 value={editedData[field] || ""}
@@ -193,6 +229,11 @@ const TestimonialList = () => {
                             </TableCell>
                           )
                         )}
+
+                        <TableCell align="center">
+                          <Switch checked={item.status} disabled />
+                        </TableCell>
+
                         <TableCell align="center">
                           <IconButton
                             onClick={() => handleSave(item._id)}
@@ -207,24 +248,37 @@ const TestimonialList = () => {
                       </>
                     ) : (
                       <>
-                        <TableCell>{item.fullName}</TableCell>
-                        <TableCell>{item.city}</TableCell>
-                        <TableCell>{item.country}</TableCell>
-                        <TableCell
-                          sx={{
-                            maxWidth: 200,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
+                        <TableCell align="center">{item.fullName}</TableCell>
+                        <TableCell align="center">{item.city}</TableCell>
+                        <TableCell align="center">{item.country}</TableCell>
+
+                        <TableCell align="center">
                           <Tooltip
                             title={item.feedbackText}
                             placement="top-start"
                           >
-                            <span>{item.feedbackText}</span>
+                            <Typography
+                              sx={{
+                                maxWidth: 220,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                fontStyle: "italic",
+                              }}
+                            >
+                              “{item.feedbackText}”
+                            </Typography>
                           </Tooltip>
                         </TableCell>
+
+                        <TableCell align="center">
+                          <Switch
+                            checked={item.status}
+                            onChange={() => handleToggleStatus(item._id)}
+                            color="success"
+                          />
+                        </TableCell>
+
                         <TableCell align="center">
                           <IconButton
                             onClick={() => handleEdit(item._id)}
@@ -246,33 +300,47 @@ const TestimonialList = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          {totalPages > 1 && (
+          {totalPages > 1 && !isMobile && (
             <Box
               mt={3}
               display="flex"
               justifyContent="center"
               alignItems="center"
-              gap={2}
+              gap={1}
             >
-              <IconButton
+              <Button
+                variant="outlined"
                 onClick={handlePrev}
                 disabled={page === 1}
-                sx={{ color: "#EF7722" }}
+                sx={{ borderColor: "#EF7722", color: "#EF7722" }}
               >
-                <ArrowBack fontSize="large" />
-              </IconButton>
-              <Typography
-                sx={{ mx: 2, fontWeight: 600, fontFamily: "Poppins" }}
-              >
-                Page {page} of {totalPages}
-              </Typography>
-              <IconButton
+                Prev
+              </Button>
+
+              {[...Array(totalPages)].map((_, i) => (
+                <Button
+                  key={i}
+                  onClick={() => setPage(i + 1)}
+                  variant={page === i + 1 ? "contained" : "outlined"}
+                  sx={{
+                    background: page === i + 1 ? "#EF7722" : "transparent",
+                    color: page === i + 1 ? "white" : "#EF7722",
+                    minWidth: 40,
+                    borderColor: "#EF7722",
+                  }}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+
+              <Button
+                variant="outlined"
                 onClick={handleNext}
                 disabled={page === totalPages}
-                sx={{ color: "#EF7722" }}
+                sx={{ borderColor: "#EF7722", color: "#EF7722" }}
               >
-                <ArrowForward fontSize="large" />
-              </IconButton>
+                Next
+              </Button>
             </Box>
           )}
         </>
@@ -285,101 +353,83 @@ const TestimonialList = () => {
                 sx={{
                   borderLeft: "6px solid #EF7722",
                   borderRadius: 3,
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-5px)",
-                    boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
-                  },
+                  p: 1,
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                  transition: "0.3s",
+                  "&:hover": { transform: "translateY(-4px)" },
                 }}
               >
-                <CardContent sx={{ p: 2 }}>
-                  {editId === item._id ? (
-                    <>
-                      {["fullName", "city", "country"].map((field) => (
-                        <TextField
-                          key={field}
-                          name={field}
-                          label={field.charAt(0).toUpperCase() + field.slice(1)}
-                          value={editedData[field] || ""}
-                          onChange={handleChange}
-                          size="small"
-                          fullWidth
-                          sx={{ mb: 1 }}
-                        />
-                      ))}
-                      <TextField
-                        name="feedbackText"
-                        label="Feedback"
-                        value={editedData.feedbackText || ""}
-                        onChange={handleChange}
-                        size="small"
-                        multiline
-                        fullWidth
-                        sx={{ mb: 1 }}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight="bold"
-                        sx={{ color: "#EF7722", mb: 0.5 }}
-                      >
-                        {item.fullName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {item.city}, {item.country}
-                      </Typography>
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold" color="#EF7722">
+                    {item.fullName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {item.city}, {item.country}
+                  </Typography>
 
-                      <Tooltip title={item.feedbackText} placement="top-start">
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            mt: 1,
-                            color: "#555",
-                            fontStyle: "italic",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            maxWidth: "100%",
-                          }}
-                        >
-                          “{item.feedbackText}”
-                        </Typography>
-                      </Tooltip>
-                    </>
-                  )}
+                  <Tooltip
+                    title={item.feedbackText}
+                    placement="top-start"
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          whiteSpace: "normal",
+                        },
+                      },
+                      popper: {
+                        sx: { whiteSpace: "normal" },
+                      },
+                    }}
+                  >
+                    <Box sx={{ width: "100%", mt: 1 }}>
+                      <Box
+                        sx={{
+                          fontStyle: "italic",
+                          fontSize: "14px",
+                          display: "-webkit-box",
+                          WebkitBoxOrient: "vertical",
+                          WebkitLineClamp: 3,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        "{item.feedbackText}"
+                      </Box>
+                    </Box>
+                  </Tooltip>
+
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mt={1}
+                  >
+                    <Typography variant="body2" fontWeight={600}>
+                      Status
+                    </Typography>
+                    <Switch
+                      checked={item.status}
+                      onChange={() => handleToggleStatus(item._id)}
+                      color="success"
+                    />
+                  </Stack>
                 </CardContent>
-                <CardActions sx={{ justifyContent: "flex-end", pb: 2 }}>
-                  {editId === item._id ? (
-                    <>
-                      <IconButton
-                        onClick={() => handleSave(item._id)}
-                        color="success"
-                      >
-                        <Save />
-                      </IconButton>
-                      <IconButton onClick={handleCancel} color="error">
-                        <Close />
-                      </IconButton>
-                    </>
-                  ) : (
-                    <>
-                      <IconButton
-                        onClick={() => handleEdit(item._id)}
-                        color="primary"
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(item._id)}
-                        color="error"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </>
-                  )}
+
+                <CardActions sx={{ justifyContent: "flex-end" }}>
+                  <IconButton
+                    onClick={() => handleEdit(item._id)}
+                    color="primary"
+                  >
+                    <Edit />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(item._id)}
+                    color="error"
+                  >
+                    <Delete />
+                  </IconButton>
                 </CardActions>
               </Card>
             ))}

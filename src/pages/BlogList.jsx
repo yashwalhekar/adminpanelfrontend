@@ -239,9 +239,21 @@ const BlogList = () => {
                   Updated: {new Date(b.updatedAt).toLocaleDateString("en-GB")}
                 </Typography> */}
 
-                <Typography variant="body2" sx={{ my: 1 }}>
-                  {b.content.slice(0, 100)}...
-                </Typography>
+                <Box
+                  sx={{
+                    my: 1,
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 3,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  <Typography variant="body2">{b.content}</Typography>
+                </Box>
+
                 <Box
                   display="flex"
                   justifyContent="space-between"
