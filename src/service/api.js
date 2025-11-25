@@ -2,7 +2,7 @@ import axios from "axios";
 
 // ✅ Create Axios instance
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // change this if backend URL differs
+  baseURL: "https://adminpanelbackend-eight.vercel.app/api",
 });
 
 // ✅ Automatically add token to headers if available
