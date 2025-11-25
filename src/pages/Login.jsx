@@ -41,7 +41,7 @@ const Login = () => {
       setLoading(true);
       const res = await API.post("/auth/login", { email, password });
 
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", res.data.token, { expires: 0 });
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
     } catch (err) {

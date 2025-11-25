@@ -127,11 +127,21 @@ const TestimonialList = () => {
 
   const handleToggleStatus = async (id) => {
     try {
-      await API.put(`/testimonials/${id}/status`);
-      fetchTestimonials();
+      const res = await API.put(`/testimonials/${id}/status`); // backend returns updated testimonial
+      const updated = res.data.data; // this is the updated testimonial
+
+      // update state for that specific testimonial without refetching whole list
+      setTestimonials((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, status: updated.status } : item
+        )
+      );
+
       setSnackbar({
         open: true,
-        message: "Status Updated successfully!!",
+        message: `Status ${
+          updated.status ? "Activated" : "Deactivated"
+        } Successfully!`,
         severity: "success",
       });
     } catch (error) {
@@ -143,6 +153,7 @@ const TestimonialList = () => {
       });
     }
   };
+
   const totalPages = Math.ceil(testimonials.length / ITEMS_PER_PAGE);
   const currentTestimonial = testimonials.slice(
     (page - 1) * ITEMS_PER_PAGE,

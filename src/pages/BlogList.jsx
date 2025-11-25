@@ -48,7 +48,7 @@ const BlogList = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const ITEMS_PER_PAGE = isMobile ? 2 : 5;
+  const ITEMS_PER_PAGE = isMobile ? 2 : 10;
 
   // ✅ Fetch blogs
   const fetchBlogs = async () => {

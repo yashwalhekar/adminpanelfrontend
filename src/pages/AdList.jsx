@@ -53,7 +53,7 @@ const AdList = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const ITEMS = isMobile ? 1 : ITEMS_PER_PAGE;
+  const ITEMS = isMobile ? 2 : ITEMS_PER_PAGE;
 
   const fetchAds = async () => {
     try {
