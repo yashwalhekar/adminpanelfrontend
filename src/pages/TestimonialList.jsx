@@ -371,45 +371,80 @@ const TestimonialList = () => {
                 }}
               >
                 <CardContent>
-                  <Typography variant="h6" fontWeight="bold" color="#EF7722">
-                    {item.fullName}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.city}, {item.country}
-                  </Typography>
-
-                  <Tooltip
-                    title={item.feedbackText}
-                    placement="top-start"
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          whiteSpace: "normal",
-                        },
-                      },
-                      popper: {
-                        sx: { whiteSpace: "normal" },
-                      },
-                    }}
-                  >
-                    <Box sx={{ width: "100%", mt: 1 }}>
-                      <Box
-                        sx={{
-                          fontStyle: "italic",
-                          fontSize: "14px",
-                          display: "-webkit-box",
-                          WebkitBoxOrient: "vertical",
-                          WebkitLineClamp: 3,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "normal",
-                          wordBreak: "break-word",
-                        }}
+                  {editId === item._id ? (
+                    <>
+                      <TextField
+                        label="Full Name"
+                        name="fullName"
+                        value={editedData.fullName}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="dense"
+                        size="small"
+                      />
+                      <TextField
+                        label="City"
+                        name="city"
+                        value={editedData.city}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="dense"
+                        size="small"
+                      />
+                      <TextField
+                        label="Country"
+                        name="country"
+                        value={editedData.country}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="dense"
+                        size="small"
+                      />
+                      <TextField
+                        label="Feedback"
+                        name="feedbackText"
+                        value={editedData.feedbackText}
+                        onChange={handleChange}
+                        fullWidth
+                        multiline
+                        rows={3}
+                        margin="dense"
+                        size="small"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        color="#EF7722"
                       >
-                        "{item.feedbackText}"
-                      </Box>
-                    </Box>
-                  </Tooltip>
+                        {item.fullName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {item.city}, {item.country}
+                      </Typography>
+
+                      <Tooltip title={item.feedbackText} placement="top-start">
+                        <Box sx={{ width: "100%", mt: 1 }}>
+                          <Box
+                            sx={{
+                              fontStyle: "italic",
+                              fontSize: "14px",
+                              display: "-webkit-box",
+                              WebkitBoxOrient: "vertical",
+                              WebkitLineClamp: 3,
+                              overflow: "hidden",
+                              whiteSpace: "normal",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            "{item.feedbackText}"
+                          </Box>
+                        </Box>
+                      </Tooltip>
+                    </>
+                  )}
 
                   <Stack
                     direction="row"
@@ -424,27 +459,45 @@ const TestimonialList = () => {
                       checked={item.status}
                       onChange={() => handleToggleStatus(item._id)}
                       color="success"
+                      disabled={editId === item._id}
                     />
                   </Stack>
                 </CardContent>
 
                 <CardActions sx={{ justifyContent: "flex-end" }}>
-                  <IconButton
-                    onClick={() => handleEdit(item._id)}
-                    color="primary"
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleDelete(item._id)}
-                    color="error"
-                  >
-                    <Delete />
-                  </IconButton>
+                  {editId === item._id ? (
+                    <>
+                      <IconButton
+                        onClick={() => handleSave(item._id)}
+                        color="success"
+                      >
+                        <Save />
+                      </IconButton>
+                      <IconButton onClick={handleCancel} color="error">
+                        <Close />
+                      </IconButton>
+                    </>
+                  ) : (
+                    <>
+                      <IconButton
+                        onClick={() => handleEdit(item._id)}
+                        color="primary"
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDelete(item._id)}
+                        color="error"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </>
+                  )}
                 </CardActions>
               </Card>
             ))}
           </Stack>
+
           {totalPages > 1 && (
             <Box
               mt={2}

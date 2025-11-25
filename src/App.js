@@ -6,6 +6,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import { Box } from "@mui/material";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
@@ -23,7 +24,16 @@ import FreebiesPdf from "./pages/FreebiesPdf";
 // ✅ ProtectedRoute component
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" />;
+
+  if (!token) return <Navigate to="/login" />;
+
+  const decoded = jwtDecode(token);
+  if (decoded.exp * 1000 < Date.now()) {
+    localStorage.clear();
+    return <Navigate to="/login" />;
+  }
+
+  return children;
 };
 
 const App = () => {
