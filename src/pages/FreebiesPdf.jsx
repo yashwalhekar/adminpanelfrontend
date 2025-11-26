@@ -12,11 +12,13 @@ import {
   Typography,
   Button,
   IconButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useState, useEffect } from "react";
 import API from "../service/api";
-import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
+import { ArrowBackIos, ArrowForwardIos, Delete } from "@mui/icons-material";
 
 const FreebiesPdf = () => {
   const theme = useTheme();
@@ -25,6 +27,11 @@ const FreebiesPdf = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sentEmails, setSentEmails] = useState({});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,6 +91,35 @@ Your Company`
       localStorage.setItem("sentEmails", JSON.stringify(updated));
       return updated;
     });
+
+    setSnackbar({
+      open: true,
+      message: "Email action opened in Gmail.",
+      type: "success",
+    });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await API.delete(`/freebies/${id}`);
+      setData((prev) => ({
+        ...prev,
+        data: prev.data.filter((item) => item._id !== id),
+      }));
+
+      setSnackbar({
+        open: true,
+        message: "Request deleted successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Delete failed", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to delete request!",
+        type: "error",
+      });
+    }
   };
 
   useEffect(() => {
@@ -103,75 +139,66 @@ Your Company`
         variant="h4"
         fontWeight={700}
         mb={3}
-        sx={{
-          color: "#EF7722",
-          textAlign: isMobile ? "center" : "left",
-        }}
+        sx={{ color: "#EF7722", textAlign: isMobile ? "center" : "left" }}
       >
         Freebies Requests
       </Typography>
 
-      {/* -------------- MOBILE VIEW WITH CARDS & ARROWS ------------ */}
+      {/* ---------- MOBILE VIEW CARDS ----------- */}
       {isMobile && (
         <Box display="flex" flexDirection="column" gap={2}>
           {currentRecords?.map((item) => (
             <Paper
-              key={item.id}
+              key={item._id}
               sx={{
                 p: 2,
                 borderRadius: 3,
-                backdropFilter: "blur(10px)",
-                background: "rgba(255,255,255,0.65)",
+                background: "rgba(255,255,255,0.8)",
                 boxShadow: "0 4px 18px rgba(0,0,0,0.08)",
               }}
             >
-              <Typography fontWeight={600} color="text.primary">
-                {item.email}
-              </Typography>
-              <Typography color="text.secondary">{item.phone}</Typography>
+              <Typography fontWeight={600}>{item.email}</Typography>
+              <Typography color="text.secondary">+{item.phone}</Typography>
 
-              <Button
-                variant="contained"
-                size="small"
-                sx={{
-                  backgroundColor: sentEmails[item.email]
-                    ? "#6c757d"
-                    : "#EF7722",
-                  fontWeight: 600,
-                  borderRadius: 2,
-                  ":hover": {
-                    backgroundColor: sentEmails[item.email]
-                      ? "#5a6268"
-                      : "#d86516",
-                  },
-                }}
-                onClick={() => handleSendEmail(item.email)}
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mt={1}
               >
-                {sentEmails[item.email] ? "Resend" : "Send Email"}
-              </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    backgroundColor: sentEmails[item.email]
+                      ? "#6c757d"
+                      : "#EF7722",
+                    borderRadius: 2,
+                  }}
+                  onClick={() => handleSendEmail(item.email)}
+                >
+                  {sentEmails[item.email] ? "Resend" : "Send"}
+                </Button>
+
+                <IconButton
+                  color="error"
+                  onClick={() => handleDelete(item._id)}
+                >
+                  <Delete />
+                </IconButton>
+              </Box>
             </Paper>
           ))}
 
-          {/* Pagination arrows */}
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            gap={2}
-            mt={2}
-          >
-            <IconButton
-              variant="outlined"
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-            >
+          {/* Pagination */}
+          <Box display="flex" justifyContent="center" gap={2} mt={2}>
+            <IconButton onClick={handlePrev} disabled={currentPage === 1}>
               <ArrowBackIos />
             </IconButton>
-            <Typography fontWeight={600}>
+            <Typography>
               {currentPage} / {totalPages}
             </Typography>
             <IconButton
-              variant="outlined"
               onClick={handleNext}
               disabled={currentPage === totalPages}
             >
@@ -181,16 +208,9 @@ Your Company`
         </Box>
       )}
 
-      {/* -------- DESKTOP VIEW WITH TABLE PAGINATION --------- */}
+      {/* ---------- DESKTOP/TABLE VIEW ----------- */}
       {!isMobile && (
-        <TableContainer
-          component={Paper}
-          sx={{
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 6px 25px rgba(0,0,0,0.10)",
-          }}
-        >
+        <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#EF7722" }}>
@@ -203,20 +223,21 @@ Your Company`
                 <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                   Action
                 </TableCell>
+                <TableCell
+                  sx={{
+                    color: "white",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  Delete
+                </TableCell>
               </TableRow>
             </TableHead>
 
             <TableBody>
               {currentRecords?.map((item) => (
-                <TableRow
-                  key={item.id}
-                  sx={{
-                    transition: "0.2s",
-                    ":hover": {
-                      backgroundColor: "rgba(239, 119, 34, 0.06)",
-                    },
-                  }}
-                >
+                <TableRow key={item._id} hover>
                   <TableCell>{item.email}</TableCell>
                   <TableCell>{item.phone}</TableCell>
                   <TableCell>
@@ -227,52 +248,49 @@ Your Company`
                         backgroundColor: sentEmails[item.email]
                           ? "#6c757d"
                           : "#EF7722",
-                        fontWeight: 600,
-                        borderRadius: 2,
-                        ":hover": {
-                          backgroundColor: sentEmails[item.email]
-                            ? "#5a6268"
-                            : "#d86516",
-                        },
                       }}
                       onClick={() => handleSendEmail(item.email)}
                     >
                       {sentEmails[item.email] ? "Resend" : "Send Email"}
                     </Button>
                   </TableCell>
+                  <TableCell align="center">
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDelete(item._id)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
 
-          {/* Desktop pagination */}
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            gap={2}
-            p={2}
-          >
-            <Button
-              variant="outlined"
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-            >
+          <Box display="flex" justifyContent="center" gap={2} p={2}>
+            <Button onClick={handlePrev} disabled={currentPage === 1}>
               Prev
             </Button>
-            <Typography fontWeight={600}>
+            <Typography>
               {currentPage} / {totalPages}
             </Typography>
-            <Button
-              variant="outlined"
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-            >
+            <Button onClick={handleNext} disabled={currentPage === totalPages}>
               Next
             </Button>
           </Box>
         </TableContainer>
       )}
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.type} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
