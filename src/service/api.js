@@ -5,7 +5,19 @@ const API = axios.create({
   baseURL: "https://adminpanelbackend-eight.vercel.app/api",
 });
 
-// ✅ Automatically add token to headers if available
+// 🔹 Add token to every request automatically
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// 🔹 Handle unauthorized responses globally
 API.interceptors.response.use(
   (response) => response,
   (error) => {
